@@ -4,7 +4,6 @@
 
 [![Status: Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://github.com)
 [![Version: 4.4](https://img.shields.io/badge/Version-4.4-blue)](https://github.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 ## ✨ Features
 
