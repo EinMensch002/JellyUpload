@@ -248,5 +248,3 @@ Vollständige Changelog: [CHANGELOG.md](CHANGELOG.md)
 **Dieses Projekt ist lizenzfrei und Public Domain.** Sie können es verwenden, modifizieren und verteilen ohne Einschränkungen.
 
 ---
-
-**Made with ❤️ for Jellyfin Media Management**
