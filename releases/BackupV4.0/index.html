@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jellyfin Dateisortierung v3</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>📁 Jellyfin Dateisortierung v3</h1>
+    <p>Automatische Analyse und Sortierung von Mediendateien mit echtem Upload</p>
+    <p style="font-size: 0.85rem; margin-top: 16px; opacity: 0.85;">
+      🔐 Session: <span id="sessionDisplay" style="font-family: monospace; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 4px;">–</span>
+    </p>
+  </header>
+
+  <main>
+    <!-- ===========================
+         SCHRITT 1: UPLOAD
+         =========================== -->
+    <section id="uploadSection" class="panel">
+      <h2>📤 Schritt 1: Dateien hochladen</h2>
+      
+      <!-- Drop Zone -->
+      <div id="dropZone" class="drop-zone">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <p class="drop-zone-text">Dateien hier ablegen oder klicken</p>
+        <p class="drop-zone-hint">Alle Videoformate unterstützt</p>
+        <input type="file" id="fileInput" multiple hidden>
+      </div>
+
+      <!-- Upload Liste mit Progress -->
+      <div id="uploadList" class="upload-list"></div>
+
+      <!-- 📋 Temp-Ordner Dateiliste mit Auswahl -->
+      <div id="tempFileListContainer" style="display: none; margin-top: 20px;">
+        <h3>📋 Dateien im Temp-Ordner</h3>
+        
+        <!-- Select All / Deselect All Buttons -->
+        <div style="margin-bottom: 12px; display: flex; gap: 8px;">
+          <button id="selectAllFilesBtn" class="btn-secondary" style="flex: 1;">
+            ✓ Alle auswählen
+          </button>
+          <button id="deselectAllFilesBtn" class="btn-secondary" style="flex: 1;">
+            ✗ Alle abwählen
+          </button>
+        </div>
+
+        <!-- Datei-Checkboxen -->
+        <div id="tempFileList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; max-height: 400px; overflow-y: auto; padding: 12px; background: rgba(59,130,246,0.05); border-radius: 8px; border: 1px solid rgba(59,130,246,0.2);">
+          <!-- Wird dynamisch befüllt -->
+        </div>
+      </div>
+
+      <!-- Action Buttons für Upload-Sektion -->
+      <div class="upload-actions">
+        <button id="reloadTempBtn" class="btn-secondary" title="Temp-Ordner neuladen">
+          🔄 Ordner neuladen
+        </button>
+        <button id="analyzeFilesBtn" class="btn-primary" disabled title="Ausgewählte Dateien aus dem Temp-Ordner analysieren">
+          ▶ Dateien analysieren
+        </button>
+      </div>
+    </section>
+
+    <!-- ===========================
+         SCHRITT 2: ANALYSE & BEARBEITUNG
+         =========================== -->
+    <section id="analysisSection" class="panel" style="display: none;">
+      <h2>✏️ Schritt 2: Dateien kategorisieren & anpassen</h2>
+      
+      <!-- Kategorisierte Dateiliste -->
+      <div id="categorizedList" class="categorized-list"></div>
+
+      <!-- Action Buttons für Analyse-Sektion -->
+      <div class="analysis-actions">
+        <button id="backToUploadBtn" class="btn-secondary">
+          ← Zurück zum Upload
+        </button>
+        <button id="finalizeBtn" class="btn-primary">
+          ✓ Fertigstellen
+        </button>
+      </div>
+    </section>
+
+    <!-- Debug Panel (nur sichtbar wenn aktiviert) -->
+    <section id="debugPanel" class="panel debug-panel" style="display: none;">
+      <h2>🐛 Debug Panel</h2>
+      <div id="debugOutput" class="debug-output"></div>
+      <button id="clearDebugBtn" class="btn-secondary">Debug löschen</button>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

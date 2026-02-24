@@ -1,0 +1,1120 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "15facbc0-1e29-4877-825d-bfbf76d45060",
+              "name": "=chatInput",
+              "value": "=INPUT:\nfilenames: {{ $json['body.originalFiles'] }}\nsession: {{ $('list1').item.json.body.sessionId }}\n\nERLAUBTE WERTE:\nmedia_type: \"movie\" | \"series\"\naudience: \"kids\" | \"adults\"\nfsk: 0,6,12,16,18 oder null  // MUSS immer versucht werden zu ermitteln\n\nAUFGABEN:\nExtrahiere folgende Felder:\n\n1. original_name\n   - Dateiname ohne Endung, unverändert\n\n2. media_type\n   - \"movie\" oder \"series\"\n\n3. audience\n   - \"kids\" oder \"adults\"\n   - MUSS immer gesetzt sein\n   - Ableiten aus Inhalt, Genre, FSK, allgemeinem Wissen\n\n4. series_name\n   - Exakter Serienname\n   - Nur bei series, sonst null\n\n5. jellyfin_name\n   - Film: \"Titel (Jahr)\"\n   - Serie Episode: \"Serienname S1 E2\"\n   - Serie Staffel: \"Serienname S1\"\n   - Keine Bindestriche\n   - Rechtschreibung prüfen und korrigieren\n\n6. season\n   - Zahl oder null\n\n7. episode\n   - Zahl oder null\n\n8. fsk\n   - Versuche die Altersfreigabe zu ermitteln\n   - Mögliche Wege:\n     - Bekanntes Genre, bekannte Serien/Filme, typische FSK-Werte\n     - Logische Ableitung aus bekannten Informationen (z. B. Landser = 16)\n     - Offizielle Altersfreigaben (z. B. über FSK)\n   - Wenn keine Information verfügbar ist, bleibt das Feld leer (\"\")\n   - Niemals spekulativ hoch setzen\n\n9. status\n   - \"success\" oder \"error\"\n\n10. message\n    - Kurz & präzise Beschreibung\n\n11. suggestions\n    - Gib ALLE alternativen Titel als EINEN STRING zurück\n    - Verwende AUSSCHLIESSLICH diesen Separator zwischen Einträgen: |||\n    - KEINE Kommas als Trennzeichen verwenden\n    - Beispiel (gültig):\n      \"Inferno (1915)|||Inferno (1980)|||Inferno (2016)\"\n    - Beispiel (ungültig):\n      \"Inferno (1915), Inferno (1980)\"\n    - Leerer String \"\" wenn eindeutig\n\n\n\n\nREGELN:\n- audience MUSS immer gesetzt sein\n- fsk MUSS aktiv versucht werden zu ermitteln, darf leer sein, wenn keine Information gefunden\n- Rechtschreibung prüfen und korrigieren\n- Nur movie oder series erlaubt\n- season/episode nur bei series\n- null-Werte nicht weglassen\n- Ausgabe = reines JSON",
+              "type": "string"
+            },
+            {
+              "id": "aa40ebaa-4d5b-4c2e-a3d6-58a40c95b7ac",
+              "name": "body.sessionId",
+              "value": "={{ $('list1').item.json.body.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "e34da553-1f56-4991-9377-15157f8d871b",
+              "name": "filename",
+              "value": "={{ $json['body.files'] }}",
+              "type": "string"
+            },
+            {
+              "id": "4d55bd85-6990-4f3b-991b-dd78b99aa0d2",
+              "name": "originalFiles",
+              "value": "={{ $json['body.originalFiles'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -96,
+        2208
+      ],
+      "id": "da7ed458-2ca6-48bd-8e50-772ca8e633ea",
+      "name": "analyse prompt"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.data }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        448,
+        2208
+      ],
+      "id": "1bb2bce4-448b-4569-b09e-2d04f4d8b64c",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/jellyupload/upload",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryPropertyName": "file"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        1488
+      ],
+      "id": "1071d5b0-6d09-4277-a214-5ebb918b80ba",
+      "name": "upload",
+      "webhookId": "1a386bea-ae00-484f-b996-c0238518deba",
+      "alwaysOutputData": true,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/jellyupload/check-exists",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        1136
+      ],
+      "id": "ed2f745a-f8d4-463c-8090-27c1f728eb67",
+      "name": "check-exists",
+      "webhookId": "1a386bea-ae00-484f-b996-c0238518deba"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f1259b4d-942d-4a2b-b395-3d19e2acc95f",
+              "leftValue": "={{ $('check-exists').item.json.body.filename }}",
+              "rightValue": "={{ $('Liste aller Dateien').item.json.name }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -96,
+        1136
+      ],
+      "id": "034d8327-346a-4128-9f31-417d146f9ef7",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"exists\": true \n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        160,
+        1056
+      ],
+      "id": "9d001b3b-aef3-4e21-bdd8-ae78a52a79ae",
+      "name": "check-exists return true"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"exists\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        160,
+        1200
+      ],
+      "id": "e7ea656f-c388-4847-b4a4-0ffc246c9f87",
+      "name": "check-exists return false"
+    },
+    {
+      "parameters": {
+        "protocol": "sftp",
+        "operation": "upload",
+        "path": "=/media/temp/{{ $('upload').item.json.body.filename }}",
+        "binaryPropertyName": "file0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        1488
+      ],
+      "id": "58cdad09-e209-4617-85f0-018151f75a9e",
+      "name": "FTP1",
+      "credentials": {
+        "sftp": {
+          "id": "fqNncJXp2dmBFinf",
+          "name": "jellylocal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "protocol": "sftp",
+        "operation": "list",
+        "path": "/media/temp",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        1488
+      ],
+      "id": "e97d5332-572e-4888-b474-d14d8317b2d5",
+      "name": "FTP2",
+      "alwaysOutputData": true,
+      "credentials": {
+        "sftp": {
+          "id": "fqNncJXp2dmBFinf",
+          "name": "jellylocal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## *Überprüfung ob Datei existiert*",
+        "height": 336,
+        "width": 848
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -496,
+        1024
+      ],
+      "typeVersion": 1,
+      "id": "4a65b62b-c07d-4f44-8b57-66510320b212",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## *Lädt Dateien auf den Server hoch*",
+        "height": 320,
+        "width": 1024
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -496,
+        1392
+      ],
+      "typeVersion": 1,
+      "id": "0617f3de-98a2-42f7-a227-fdae118d0bb1",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "protocol": "sftp",
+        "operation": "list",
+        "path": "/media/temp",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        1136
+      ],
+      "id": "3400d4df-d62b-47fb-adfc-92de41bd0cf3",
+      "name": "Liste aller Dateien",
+      "alwaysOutputData": true,
+      "executeOnce": false,
+      "credentials": {
+        "sftp": {
+          "id": "fqNncJXp2dmBFinf",
+          "name": "jellylocal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f1259b4d-942d-4a2b-b395-3d19e2acc95f",
+              "leftValue": "={{ $('upload').item.json.body.filename }}",
+              "rightValue": "={{ $json.name }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        80,
+        1488
+      ],
+      "id": "0718a67b-6f9a-4c22-bedb-2ab39039c8fd",
+      "name": "If1",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"message\": \"Datei wurde nicht hochgeladen\",\n  \"uploadedFile\": \"{{ $('upload').item.json.body.filename }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        336,
+        1568
+      ],
+      "id": "a648e25d-8248-4718-9aee-1371d919e7f2",
+      "name": "return false"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"Datei wurde hochgeladen\",\n  \"uploadedFile\": \"{{ $('upload').item.json.body.filename }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        336,
+        1424
+      ],
+      "id": "729de128-c91e-406d-a14b-a71653f83deb",
+      "name": "return true"
+    },
+    {
+      "parameters": {
+        "content": "## *Schickt eine Liste der Dateien An die Web UI*",
+        "height": 320,
+        "width": 944
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -496,
+        1744
+      ],
+      "typeVersion": 1,
+      "id": "2b0b8fd2-5b48-41f0-bf71-fa4f79da6804",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "protocol": "sftp",
+        "operation": "list",
+        "path": "/media/temp",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        1840
+      ],
+      "id": "aa98491b-c691-48dc-9bf3-121dcb64b764",
+      "name": "FTP",
+      "alwaysOutputData": true,
+      "credentials": {
+        "sftp": {
+          "id": "fqNncJXp2dmBFinf",
+          "name": "jellylocal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n \"files\": [{{ $json.file }}]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        256,
+        1840
+      ],
+      "id": "73eeda01-4293-4398-ae4f-204a96fb1170",
+      "name": "return false1"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        80,
+        1840
+      ],
+      "id": "d01ff093-0bc5-4263-9ad7-efe941cdcdf7",
+      "name": "Aggregate",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/jellyupload/list",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        1840
+      ],
+      "id": "5f6a5f15-6886-45a2-8baa-ca7de85652d0",
+      "name": "list",
+      "webhookId": "1a386bea-ae00-484f-b996-c0238518deba",
+      "alwaysOutputData": false,
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d35fa747-167c-47e0-8574-edbe871bb767",
+              "name": "file",
+              "value": "=\"{{ $json.name }}|||{{ $json.accessTime }}|||{{ $json.size }}\"",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -96,
+        1840
+      ],
+      "id": "aaa2c66c-9adb-4c85-a4dc-a2c5b9cb33ca",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "## *Analysiert die Dateien*",
+        "height": 288,
+        "width": 1136
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -496,
+        2112
+      ],
+      "typeVersion": 1,
+      "id": "de09be69-84c9-4473-836d-ed1fd72dbbd8",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/jellyupload/analyse",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        2208
+      ],
+      "id": "6d4daafb-75cb-4d78-8879-610054946f40",
+      "name": "list1",
+      "webhookId": "1a386bea-ae00-484f-b996-c0238518deba",
+      "alwaysOutputData": false,
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body.files, body.originalFiles",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        2208
+      ],
+      "id": "b5570488-9fcd-4003-92d8-fe6142e67a68",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {
+          "includeBinaries": false
+        }
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        272,
+        2208
+      ],
+      "id": "9b14efef-4449-4300-b570-69738e98d7e6",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "content": "## *Verschiebt die Dateien*",
+        "height": 432,
+        "width": 608
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -496,
+        2448
+      ],
+      "typeVersion": 1,
+      "id": "f12023b1-5c80-49c2-a925-04a7691ef39e",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "protocol": "sftp",
+        "operation": "rename",
+        "oldPath": "=/media/temp/{{ $('list2').item.json.body.originalName }}",
+        "newPath": "={{ $json.body.path }}{{ $json.body.series_name }}/{{ $json.body.series_name }} S{{ $json.body.season }}/{{ $json.body.jellyfin_name }}{{ $json.body.fileExtension }}",
+        "options": {
+          "createDirectories": true
+        }
+      },
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        2544
+      ],
+      "id": "a1d27cb6-2296-4cf8-94e7-57187acda839",
+      "name": "FTP3",
+      "alwaysOutputData": true,
+      "credentials": {
+        "sftp": {
+          "id": "fqNncJXp2dmBFinf",
+          "name": "jellylocal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/jellyupload/finalize",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        2624
+      ],
+      "id": "76da20c6-fbe4-4dd0-aaad-1859bdf02b94",
+      "name": "list2",
+      "webhookId": "1a386bea-ae00-484f-b996-c0238518deba",
+      "alwaysOutputData": false,
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "fsvWQZsRIY1nm4If",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/fsvWQZsRIY1nm4If",
+          "cachedResultName": "My Sub-Workflow 1"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chatInput": "={{ $json.chatInput }}",
+            "sessionId": "={{ $json.body.sessionId }}",
+            "filename": "={{ $json.filename }}",
+            "originalFile": "={{ $json.originalFiles }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chatInput",
+              "displayName": "chatInput",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "filename",
+              "displayName": "filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "originalFile",
+              "displayName": "originalFile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        2208
+      ],
+      "id": "a1f3c9ab-7f6a-4bfe-b5fe-79846bcfdc45",
+      "name": "ai clust"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "56c3b6bd-041c-4f2b-89c5-b3b1ff9ee92a",
+              "leftValue": "={{ $json.body.mediaType }}",
+              "rightValue": "series",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -256,
+        2624
+      ],
+      "id": "a7a975d6-a333-4d20-a2a6-4d7252b7eb7c",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "protocol": "sftp",
+        "operation": "rename",
+        "oldPath": "=/media/temp/{{ $('list2').item.json.body.originalName }}",
+        "newPath": "={{ $('list2').item.json.body.path }}{{ $('list2').item.json.body.jellyfin_name }}{{ $('list2').item.json.body.fileExtension }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        2688
+      ],
+      "id": "90d46bc4-d612-450a-82ec-e0375cc93725",
+      "name": "FTP4",
+      "alwaysOutputData": true,
+      "credentials": {
+        "sftp": {
+          "id": "fqNncJXp2dmBFinf",
+          "name": "jellylocal"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "list2": [
+      {
+        "json": {
+          "headers": {
+            "host": "192.168.178.145:5678",
+            "connection": "keep-alive",
+            "content-length": "345",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+            "sec-ch-ua": "\"Not(A:Brand\";v=\"8\", \"Chromium\";v=\"144\", \"Google Chrome\";v=\"144\"",
+            "content-type": "application/json",
+            "sec-ch-ua-mobile": "?0",
+            "accept": "*/*",
+            "origin": "https://192.168.178.145",
+            "sec-fetch-site": "same-site",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-dest": "empty",
+            "referer": "https://192.168.178.145/",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "originalName": "Episode 10 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen.mp4",
+            "fileExtension": ".mp4",
+            "path": "/media/Serien/Erwachsene/",
+            "audience": "adults",
+            "mediaType": "series",
+            "jellyfin_name": "Vinland Saga S2 E10",
+            "season": 2,
+            "episode": 10,
+            "series_name": "Vinland Saga",
+            "sessionId": "session-1769637432510-qd21409tf"
+          },
+          "webhookUrl": "https://localhost:5678/webhook/jellyupload/finalize",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "list1": [
+      {
+        "json": {
+          "headers": {
+            "host": "192.168.178.145:5678",
+            "connection": "keep-alive",
+            "content-length": "8329",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+            "sec-ch-ua": "\"Not(A:Brand\";v=\"8\", \"Chromium\";v=\"144\", \"Google Chrome\";v=\"144\"",
+            "content-type": "application/json",
+            "sec-ch-ua-mobile": "?0",
+            "accept": "*/*",
+            "origin": "https://192.168.178.145",
+            "sec-fetch-site": "same-site",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-dest": "empty",
+            "referer": "https://192.168.178.145/",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "files": [
+              "Episode 1 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 1 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 10 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 10 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 11 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 12 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 12 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 13 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 13 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 14 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 14 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 15 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 15 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 16 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 17 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 18 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 19 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 2 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 2 Staffel 2 von Vinland Sager AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 20 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 21 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 22 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 23 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 24 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 25 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 26 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 27 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 28 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 29 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 3 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 3 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 30 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 31 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 4 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 4 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 5 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 5 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 6 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 6 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 7 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 7 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 8 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 8 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen",
+              "Episode 9 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen",
+              "Vinland Saga"
+            ],
+            "originalFiles": [
+              "Episode 1 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 1 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 10 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 10 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 11 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 12 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 12 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 13 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 13 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 14 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 14 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 15 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 15 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 16 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 17 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 18 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 19 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 2 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 2 Staffel 2 von Vinland Sager AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 20 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 21 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 22 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 23 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 24 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 25 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 26 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 27 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 28 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 29 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 3 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 3 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 30 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 31 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 4 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 4 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 5 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 5 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 6 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 6 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 7 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 7 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 8 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 8 Staffel 2 von Vinland Saga AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Episode 9 Staffel 1 von One Piece (2025) AniWorld.to - Animes gratis legal online ansehen.mp4",
+              "Vinland Saga"
+            ],
+            "sessionId": "session-1769637975169-h6hig5nes"
+          },
+          "webhookUrl": "https://localhost:5678/webhook/jellyupload/analyse",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "analyse prompt": {
+      "main": [
+        [
+          {
+            "node": "ai clust",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "upload": {
+      "main": [
+        [
+          {
+            "node": "FTP1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check-exists": {
+      "main": [
+        [
+          {
+            "node": "Liste aller Dateien",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "check-exists return true",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "check-exists return false",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FTP1": {
+      "main": [
+        [
+          {
+            "node": "FTP2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FTP2": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Liste aller Dateien": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "return true",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "return false",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FTP": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "return false1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "list": {
+      "main": [
+        [
+          {
+            "node": "FTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "list1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "analyse prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FTP3": {
+      "main": [
+        []
+      ]
+    },
+    "list2": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ai clust": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "FTP3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "FTP4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FTP4": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "e98fec43-64e7-4181-b85e-d27be8ccc2b7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6b12e1028f6dd2e29ae37b0a6b0feccc49b742f2d736697a8b9fe43cf61c460a"
+  },
+  "id": "9_oVva0O3vM4Tg2UlOnx8",
+  "tags": []
+}

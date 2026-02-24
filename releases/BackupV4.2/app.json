@@ -1,0 +1,35 @@
+{
+  "version": "3.0",
+  "debug": {
+    "enabled": false,
+    "allowUrlOverride": true
+  },
+  "paths": {
+    "SE": "/media/Serien/Erwachsene/",
+    "SK": "/media/Serien/Kinder/",
+    "FE": "/media/Filme/Erwachsene/",
+    "FK": "/media/Filme/Kinder/"
+  },
+  "upload": {
+    "enabled": true,
+    "disableChromeOS": true
+  },
+  "api": {
+    "n8nBaseUrl": "https://192.168.178.145:5678/webhook/jellyupload",
+    "n8nBaseUrlTest": "https://192.168.178.145:5678/webhook-test/jellyupload",
+    "endpoints": {
+      "checkExists": "/check-exists",
+      "upload": "/upload",
+      "list": "/list",
+      "analyse": "/analyse",
+      "finalize": "/finalize"
+    },
+    "endpointConfig": {
+      "checkExists": { "requiresFile": true, "buttonLabel": "Prüfen" },
+      "upload": { "requiresFile": true, "buttonLabel": "Upload" },
+      "list": { "requiresFile": false, "buttonLabel": "Liste abrufen" },
+      "analyse": { "requiresFile": false, "buttonLabel": "Analysieren" },
+      "finalize": { "requiresFile": false, "buttonLabel": "Fertigstellen" }
+    }
+  }
+}

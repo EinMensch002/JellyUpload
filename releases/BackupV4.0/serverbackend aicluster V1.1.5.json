@@ -1,0 +1,1506 @@
+{
+  "name": "My Sub-Workflow 1",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chatInput"
+            },
+            {
+              "name": "sessionId"
+            },
+            {
+              "name": "filename"
+            },
+            {
+              "name": "originalFile"
+            }
+          ]
+        }
+      },
+      "id": "c055762a-8fe7-4141-a639-df2372f30060",
+      "typeVersion": 1.1,
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -208,
+        368
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b5942df6-0160-4ef7-965d-57583acdc8aa",
+      "name": "Replace me with your logic",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        5360,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Du bist ein AI-Agent für den Upload von Mediendateien auf einen Jellyfin-Server. \nDeine Aufgabe ist es, Mediendateien korrekt zu analysieren, damit sie eindeutig \nin die deutsche Ordnerstruktur einsortiert werden können:\n\n- Zielgruppe: Kinder oder Erwachsene\n- Medientyp: Filme oder Serien\n\nBeispiele für Zielordner:\n- /Kinder/Filme\n- /Kinder/Serien\n- /Erwachsene/Filme\n- /Erwachsene/Serien\n\nDeine Analyse muss alle nötigen Informationen liefern, damit Jellyfin Inhalte \nkorrekt erkennt und nichts falsch einstuft. Prüfe die Rechtschreibung und korrigiere sie. \nVermeide Dopplungen und spare Tokens, gib nur notwendige Daten aus.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        640,
+        560
+      ],
+      "id": "0b998ccf-cca0-4b4b-90e3-b59328a00d5f",
+      "name": "AI Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        768
+      ],
+      "id": "9b6d0ba1-b061-407c-a396-adea2aa82642",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"original_name\": \"string\",\n  \"media_type\": \"movie | series\",\n  \"audience\": \"kids | adults\",\n  \"series_name\": \"string | null\",\n  \"jellyfin_name\": \"string\",\n  \"season\": \"number | null\",\n  \"episode\": \"number | null\",\n  \"fsk\": \"number\",\n  \"status\": \"success | error\",\n  \"message\": \"string\",\n  \"suggestions\": \"string\"\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        784,
+        768
+      ],
+      "id": "5e666038-88b4-4bc7-ad23-366f5add5f5b",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 592,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        560,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "16dad9cf-4fc3-464b-81d8-193381cb66b8",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Du bist ein AI-Agent für den Upload von Mediendateien auf einen Jellyfin-Server. \nDeine Aufgabe ist es, Mediendateien korrekt zu analysieren, damit sie eindeutig \nin die deutsche Ordnerstruktur einsortiert werden können:\n\n- Zielgruppe: Kinder oder Erwachsene\n- Medientyp: Filme oder Serien\n\nBeispiele für Zielordner:\n- /Kinder/Filme\n- /Kinder/Serien\n- /Erwachsene/Filme\n- /Erwachsene/Serien\n\nDeine Analyse muss alle nötigen Informationen liefern, damit Jellyfin Inhalte \nkorrekt erkennt und nichts falsch einstuft. Prüfe die Rechtschreibung und korrigiere sie. \nVermeide Dopplungen und spare Tokens, gib nur notwendige Daten aus.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1136,
+        576
+      ],
+      "id": "442c7e7e-5c88-4a78-a8d5-7a8ffa64481e",
+      "name": "AI Agent1",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"original_name\": \"string\",\n  \"media_type\": \"movie | series\",\n  \"audience\": \"kids | adults\",\n  \"series_name\": \"string | null\",\n  \"jellyfin_name\": \"string\",\n  \"season\": \"number | null\",\n  \"episode\": \"number | null\",\n  \"fsk\": \"number\",\n  \"status\": \"success | error\",\n  \"message\": \"string\",\n  \"suggestions\": \"string\"\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        784
+      ],
+      "id": "6c4d09bd-5a91-4a5d-b70f-f98e1332b062",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 608,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1056,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "b0564286-661a-4ff6-ae46-582da67dadb6",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Du bist ein AI-Agent für den Upload von Mediendateien auf einen Jellyfin-Server. \nDeine Aufgabe ist es, Mediendateien korrekt zu analysieren, damit sie eindeutig \nin die deutsche Ordnerstruktur einsortiert werden können:\n\n- Zielgruppe: Kinder oder Erwachsene\n- Medientyp: Filme oder Serien\n\nBeispiele für Zielordner:\n- /Kinder/Filme\n- /Kinder/Serien\n- /Erwachsene/Filme\n- /Erwachsene/Serien\n\nDeine Analyse muss alle nötigen Informationen liefern, damit Jellyfin Inhalte \nkorrekt erkennt und nichts falsch einstuft. Prüfe die Rechtschreibung und korrigiere sie. \nVermeide Dopplungen und spare Tokens, gib nur notwendige Daten aus.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1632,
+        592
+      ],
+      "id": "896b7490-c1b6-45de-bb32-a06638d323a1",
+      "name": "AI Agent2",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When Executed by Another Workflow').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1680,
+        800
+      ],
+      "id": "0b3f5c7b-31cf-4278-8dc0-49d641ad3ed7",
+      "name": "Simple Memory2"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"original_name\": \"string\",\n  \"media_type\": \"movie | series\",\n  \"audience\": \"kids | adults\",\n  \"series_name\": \"string | null\",\n  \"jellyfin_name\": \"string\",\n  \"season\": \"number | null\",\n  \"episode\": \"number | null\",\n  \"fsk\": \"number\",\n  \"status\": \"success | error\",\n  \"message\": \"string\",\n  \"suggestions\": \"string\"\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1776,
+        800
+      ],
+      "id": "bf388504-3218-4b4c-ac7a-be8a7bd5777f",
+      "name": "Structured Output Parser2"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 624,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1552,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "b5a2e326-9e55-4688-9ce6-4d86c796cce9",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "numberInputs": 8
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4736,
+        176
+      ],
+      "id": "ae50b343-d6cd-4aca-8742-7b7647231a16",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Du bist ein AI-Agent für den Upload von Mediendateien auf einen Jellyfin-Server. \nDeine Aufgabe ist es, Mediendateien korrekt zu analysieren, damit sie eindeutig \nin die deutsche Ordnerstruktur einsortiert werden können:\n\n- Zielgruppe: Kinder oder Erwachsene\n- Medientyp: Filme oder Serien\n\nBeispiele für Zielordner:\n- /Kinder/Filme\n- /Kinder/Serien\n- /Erwachsene/Filme\n- /Erwachsene/Serien\n\nDeine Analyse muss alle nötigen Informationen liefern, damit Jellyfin Inhalte \nkorrekt erkennt und nichts falsch einstuft. Prüfe die Rechtschreibung und korrigiere sie. \nVermeide Dopplungen und spare Tokens, gib nur notwendige Daten aus.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2128,
+        608
+      ],
+      "id": "9ba46243-2ec7-4d54-94dc-32a5996544a8",
+      "name": "AI Agent3",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When Executed by Another Workflow').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        2176,
+        816
+      ],
+      "id": "8af64a4e-49f8-49d5-8ab9-a4af6cdce479",
+      "name": "Simple Memory3"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"original_name\": \"string\",\n  \"media_type\": \"movie | series\",\n  \"audience\": \"kids | adults\",\n  \"series_name\": \"string | null\",\n  \"jellyfin_name\": \"string\",\n  \"season\": \"number | null\",\n  \"episode\": \"number | null\",\n  \"fsk\": \"number\",\n  \"status\": \"success | error\",\n  \"message\": \"string\",\n  \"suggestions\": \"string\"\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2272,
+        816
+      ],
+      "id": "0180107d-8a2c-4983-b055-61e3e7151deb",
+      "name": "Structured Output Parser3"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 640,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2048,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "905a8a18-a2ea-46d9-93ae-d526862bf2bc",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Du bist ein AI-Agent für den Upload von Mediendateien auf einen Jellyfin-Server. \nDeine Aufgabe ist es, Mediendateien korrekt zu analysieren, damit sie eindeutig \nin die deutsche Ordnerstruktur einsortiert werden können:\n\n- Zielgruppe: Kinder oder Erwachsene\n- Medientyp: Filme oder Serien\n\nBeispiele für Zielordner:\n- /Kinder/Filme\n- /Kinder/Serien\n- /Erwachsene/Filme\n- /Erwachsene/Serien\n\nDeine Analyse muss alle nötigen Informationen liefern, damit Jellyfin Inhalte \nkorrekt erkennt und nichts falsch einstuft. Prüfe die Rechtschreibung und korrigiere sie. \nVermeide Dopplungen und spare Tokens, gib nur notwendige Daten aus.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2624,
+        624
+      ],
+      "id": "4a1b72a6-34ac-43b4-b65a-3a987ccb29e8",
+      "name": "AI Agent4",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When Executed by Another Workflow').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        2672,
+        832
+      ],
+      "id": "38c6e58b-7378-41b6-80cf-2cccf8203e15",
+      "name": "Simple Memory4"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"original_name\": \"string\",\n  \"media_type\": \"movie | series\",\n  \"audience\": \"kids | adults\",\n  \"series_name\": \"string | null\",\n  \"jellyfin_name\": \"string\",\n  \"season\": \"number | null\",\n  \"episode\": \"number | null\",\n  \"fsk\": \"number\",\n  \"status\": \"success | error\",\n  \"message\": \"string\",\n  \"suggestions\": \"string\"\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2768,
+        832
+      ],
+      "id": "e738fb4d-63b1-4f65-af62-1c27e289edff",
+      "name": "Structured Output Parser4"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 656,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2544,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "d7d31cf6-dd7f-46d4-806e-8546c6b4f36c",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        608,
+        976
+      ],
+      "id": "1beb2420-224f-44bd-822e-7f1676f163ef",
+      "name": "API Acount1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "uzzxcFFYZ66vW69h",
+          "name": "API Acount 1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        992
+      ],
+      "id": "fd53ca18-5054-482d-a1a5-8b61c65df951",
+      "name": "ein.brot002",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "jUbcxWWUeqm3EPpW",
+          "name": "ein.brot002"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        1008
+      ],
+      "id": "de6289ee-f5e2-4019-ae1f-99315280909b",
+      "name": "ein.ghost002",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "i54TLql2flTdOcwN",
+          "name": "ein.ghost002"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2096,
+        1024
+      ],
+      "id": "ee37e952-7fb2-452c-a07f-4e801d1ff252",
+      "name": "lukas google",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GffBIerok8OjJ3Ye",
+          "name": "lukas google"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2592,
+        1040
+      ],
+      "id": "83c2c6f7-dac5-4597-b939-43760d9d44ee",
+      "name": "marvin.m.schatt",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "9FRrH8vMZLP3X6Ok",
+          "name": "marvin.m.schatt"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Du bist ein AI-Agent für den Upload von Mediendateien auf einen Jellyfin-Server. \nDeine Aufgabe ist es, Mediendateien korrekt zu analysieren, damit sie eindeutig \nin die deutsche Ordnerstruktur einsortiert werden können:\n\n- Zielgruppe: Kinder oder Erwachsene\n- Medientyp: Filme oder Serien\n\nBeispiele für Zielordner:\n- /Kinder/Filme\n- /Kinder/Serien\n- /Erwachsene/Filme\n- /Erwachsene/Serien\n\nDeine Analyse muss alle nötigen Informationen liefern, damit Jellyfin Inhalte \nkorrekt erkennt und nichts falsch einstuft. Prüfe die Rechtschreibung und korrigiere sie. \nVermeide Dopplungen und spare Tokens, gib nur notwendige Daten aus.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        3120,
+        640
+      ],
+      "id": "c8758447-9492-4e3e-b0e9-1cd74dd7a2a5",
+      "name": "AI Agent5",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When Executed by Another Workflow').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        3168,
+        848
+      ],
+      "id": "f5fff51c-f6ed-475d-b271-01b097b1f907",
+      "name": "Simple Memory5"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"original_name\": \"string\",\n  \"media_type\": \"movie | series\",\n  \"audience\": \"kids | adults\",\n  \"series_name\": \"string | null\",\n  \"jellyfin_name\": \"string\",\n  \"season\": \"number | null\",\n  \"episode\": \"number | null\",\n  \"fsk\": \"number\",\n  \"status\": \"success | error\",\n  \"message\": \"string\",\n  \"suggestions\": \"string\"\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        3264,
+        848
+      ],
+      "id": "74c478b0-ab33-4550-b9d8-f21a71c4a0f9",
+      "name": "Structured Output Parser5"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 672,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3040,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "2f595454-61e8-435e-ad4d-d51f23fe3340",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        3088,
+        1056
+      ],
+      "id": "312d72b1-89d2-41b8-b4f1-ce1b7b77568f",
+      "name": "schatt.marvin.maurice",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "7SyZCvkOrtGVblNW",
+          "name": "schatt.marvin.maurcie"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When Executed by Another Workflow').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1184,
+        784
+      ],
+      "id": "a99d0112-16ba-4592-a4b4-3f2936f4f26d",
+      "name": "Simple Memory6"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "filename",
+              "renameField": true,
+              "outputFieldName": "error"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        4736,
+        688
+      ],
+      "id": "1c02e780-8172-43d7-9a55-4b43c1e02ae2",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Du bist ein AI-Agent für den Upload von Mediendateien auf einen Jellyfin-Server. \nDeine Aufgabe ist es, Mediendateien korrekt zu analysieren, damit sie eindeutig \nin die deutsche Ordnerstruktur einsortiert werden können:\n\n- Zielgruppe: Kinder oder Erwachsene\n- Medientyp: Filme oder Serien\n\nBeispiele für Zielordner:\n- /Kinder/Filme\n- /Kinder/Serien\n- /Erwachsene/Filme\n- /Erwachsene/Serien\n\nDeine Analyse muss alle nötigen Informationen liefern, damit Jellyfin Inhalte \nkorrekt erkennt und nichts falsch einstuft. Prüfe die Rechtschreibung und korrigiere sie. \nVermeide Dopplungen und spare Tokens, gib nur notwendige Daten aus.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        3616,
+        656
+      ],
+      "id": "aacde88a-d70d-42ae-9a37-d395df4e171d",
+      "name": "AI Agent6",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When Executed by Another Workflow').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        3664,
+        864
+      ],
+      "id": "5a75cd7e-275e-418c-9e20-05597b99b9b9",
+      "name": "Simple Memory7"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"original_name\": \"string\",\n  \"media_type\": \"movie | series\",\n  \"audience\": \"kids | adults\",\n  \"series_name\": \"string | null\",\n  \"jellyfin_name\": \"string\",\n  \"season\": \"number | null\",\n  \"episode\": \"number | null\",\n  \"fsk\": \"number\",\n  \"status\": \"success | error\",\n  \"message\": \"string\",\n  \"suggestions\": \"string\"\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        3760,
+        864
+      ],
+      "id": "551b1845-bce5-4ba8-affa-d478d8745cc5",
+      "name": "Structured Output Parser6"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 688,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3536,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "ebd156e0-3c8a-4328-914b-170c16230cdd",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        3584,
+        1072
+      ],
+      "id": "96f0d3af-9a7c-4669-abc0-4f446591c678",
+      "name": "timmnorbert040",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "3x5OiyNMSPV3yPrd",
+          "name": "timmnorbert040"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Du bist ein AI-Agent für den Upload von Mediendateien auf einen Jellyfin-Server. \nDeine Aufgabe ist es, Mediendateien korrekt zu analysieren, damit sie eindeutig \nin die deutsche Ordnerstruktur einsortiert werden können:\n\n- Zielgruppe: Kinder oder Erwachsene\n- Medientyp: Filme oder Serien\n\nBeispiele für Zielordner:\n- /Kinder/Filme\n- /Kinder/Serien\n- /Erwachsene/Filme\n- /Erwachsene/Serien\n\nDeine Analyse muss alle nötigen Informationen liefern, damit Jellyfin Inhalte \nkorrekt erkennt und nichts falsch einstuft. Prüfe die Rechtschreibung und korrigiere sie. \nVermeide Dopplungen und spare Tokens, gib nur notwendige Daten aus.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        4112,
+        672
+      ],
+      "id": "5d4b3bb8-0577-472f-a520-24850b2d8fcd",
+      "name": "AI Agent7",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When Executed by Another Workflow').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        4160,
+        880
+      ],
+      "id": "7da18bd9-cbf0-4563-9ef3-342c1c5b3230",
+      "name": "Simple Memory8"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"original_name\": \"string\",\n  \"media_type\": \"movie | series\",\n  \"audience\": \"kids | adults\",\n  \"series_name\": \"string | null\",\n  \"jellyfin_name\": \"string\",\n  \"season\": \"number | null\",\n  \"episode\": \"number | null\",\n  \"fsk\": \"number\",\n  \"status\": \"success | error\",\n  \"message\": \"string\",\n  \"suggestions\": \"string\"\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        4256,
+        880
+      ],
+      "id": "683f0de0-c017-4d35-8ece-a904ba4d338a",
+      "name": "Structured Output Parser7"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 704,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4032,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "193ea914-c585-41ad-951c-3f0651442b43",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        4080,
+        1088
+      ],
+      "id": "65e71883-070a-4362-a405-527ec9a073ba",
+      "name": "Karina",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "6RFiBuxsZSjkBi1r",
+          "name": "Karina"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "Oais8plx9P5bVkCW",
+          "mode": "list",
+          "cachedResultName": "Jellyupload",
+          "cachedResultUrl": "/projects/QDqRfrREgw1Ossq4/datatables/Oais8plx9P5bVkCW"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "original_name": "={{ $json.output.original_name }}",
+            "media_type": "={{ $json.output.media_type }}",
+            "audience": "={{ $json.output.audience }}",
+            "series_name": "={{ $json.output.series_name }}",
+            "season": "={{ $json.output.season }}",
+            "jellyfin_name": "={{ $json.output.jellyfin_name }}",
+            "episode": "={{ $json.output.episode }}",
+            "fsk": "={{ $json.output.fsk }}",
+            "status": "={{ $json.output.status }}",
+            "message": "={{ $json.output.message }}",
+            "suggestions": "={{ $json.output.suggestions }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "original_name",
+              "displayName": "original_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "media_type",
+              "displayName": "media_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "audience",
+              "displayName": "audience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "series_name",
+              "displayName": "series_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "jellyfin_name",
+              "displayName": "jellyfin_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "season",
+              "displayName": "season",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "episode",
+              "displayName": "episode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fsk",
+              "displayName": "fsk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "suggestions",
+              "displayName": "suggestions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        4944,
+        192
+      ],
+      "id": "262c3765-116c-48b6-8ff9-e54432fe0d21",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        5184,
+        128
+      ],
+      "id": "12b87f8c-c84e-4e3a-9c8c-7d3872e03565",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "Oais8plx9P5bVkCW",
+          "mode": "list",
+          "cachedResultName": "Jellyupload",
+          "cachedResultUrl": "/projects/QDqRfrREgw1Ossq4/datatables/Oais8plx9P5bVkCW"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "original_name",
+              "keyValue": "={{ $json.filename }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        48,
+        288
+      ],
+      "id": "9be2feb4-bde0-49e9-8441-9b7b34f86bfa",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "original_name",
+              "field2": "filename"
+            }
+          ]
+        },
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        304,
+        352
+      ],
+      "id": "66cd9201-9b0e-4b45-81a2-c50f86645687",
+      "name": "Merge2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory2": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace me with your logic": {
+      "main": [
+        []
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ],
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory3": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory4": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser4": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ],
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API Acount1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ein.brot002": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ein.ghost002": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lukas google": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "marvin.m.schatt": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory5": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser5": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ],
+        [
+          {
+            "node": "AI Agent5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "schatt.marvin.maurice": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser5",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent5": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 5
+          }
+        ],
+        [
+          {
+            "node": "AI Agent6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory6": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Simple Memory7": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent6",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser6": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent6",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent6": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 6
+          }
+        ],
+        [
+          {
+            "node": "AI Agent7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "timmnorbert040": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent6",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser6",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory8": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent7",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser7": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent7",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent7": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 7
+          }
+        ],
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Karina": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent7",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser7",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Replace me with your logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "f5cc94be-76e8-4fe0-a215-4e1e242fa437",
+  "meta": {
+    "instanceId": "6b12e1028f6dd2e29ae37b0a6b0feccc49b742f2d736697a8b9fe43cf61c460a"
+  },
+  "id": "fsvWQZsRIY1nm4If",
+  "tags": []
+}
