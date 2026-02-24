@@ -8,6 +8,10 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/) und folgt
 
 ## [4.4] - 2026-02-24
 
+### 📝 Endpunkt-Korrektur
+- Beim Upload ist eine Datei erforderlich (POST `/upload`)
+- Beim Finalisieren (`/finalize`) werden nur Metadaten aus dem Temp-Ordner verschoben, es wird keine Datei mehr benötigt
+
 ### 🔧 Critical Bug Fix: Dateiendungs-Erkennung
 
 **Problem:** Dateien mit URL-Suffixen (z.B. `Arcane S01E01 S.to.mp4`) wurden falsch verarbeitet.

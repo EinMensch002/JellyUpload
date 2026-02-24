@@ -108,18 +108,19 @@ npx http-server -p 8000
   - Media-Type, Staffel, Episode
   - FSK, Zielgruppe (adults/kids)
   - Session-ID für Tracking
+- **Es wird keine Datei mehr benötigt, die Dateien werden aus dem Temp-Ordner verschoben**
 - Server speichert in richtige Verzeichnisse
 - Seite auto-reload nach erfolgreicher Fertigstellung
 
 ## 🔌 API-Endpunkte
 
-| Endpoint | Methode | Datei | Beschreibung |
-|----------|---------|-------|-------------|
-| `/check-exists` | POST | ✅ Erforderlich | Prüfung ob Datei existiert |
-| `/upload` | POST | ✅ Erforderlich | Datei hochladen |
-| `/list` | POST | ❌ Optional | Temp-Ordner auflisten |
-| `/analyse` | POST | ❌ Optional | KI-Analyse starten |
-| `/finalize` | POST | ✅ Erforderlich | Finale Speicherung |
+| Endpoint      | Methode | Datei erforderlich | Beschreibung |
+|---------------|---------|-------------------|-------------|
+| `/check-exists` | POST    | ✅                | Prüfung ob Datei existiert |
+| `/upload`       | POST    | ✅                | Datei hochladen |
+| `/list`         | POST    | ❌                | Temp-Ordner auflisten |
+| `/analyse`      | POST    | ❌                | KI-Analyse starten |
+| `/finalize`     | POST    | ❌                | Finale Speicherung (verschiebt nur, keine Datei nötig) |
 
 ### Request/Response Struktur
 
@@ -245,5 +246,3 @@ Vollständige Changelog: [CHANGELOG.md](CHANGELOG.md)
 ## 📄 Lizenz
 
 **Dieses Projekt ist lizenzfrei und Public Domain.** Sie können es verwenden, modifizieren und verteilen ohne Einschränkungen.
-
----

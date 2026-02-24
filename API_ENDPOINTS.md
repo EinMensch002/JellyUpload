@@ -4,13 +4,13 @@ Vollständige Dokumentation aller verfügbaren API-Endpunkte für das JellyUploa
 
 ## 📋 Übersicht
 
-| Endpunkt | Methode | Datei | Anforderung | Beschreibung |
-|----------|---------|--------|------------|-------------|
-| [`/check-exists`](#check-exists) | POST | ❌ | **REQUIRED** | Prüfung ob Datei existiert |
-| [`/upload`](#upload) | POST | ✅ | **REQUIRED** | Datei hochladen |
-| [`/list`](#list) | POST | ❌ | OPTIONAL | Temp-Ordner auflisten |
-| [`/analyse`](#analyse) | POST | ❌ | OPTIONAL | KI-Analyse starten |
-| [`/finalize`](#finalize) | POST | ✅ | **REQUIRED** | Finale Speicherung |
+| Endpunkt | Methode | Datei erforderlich | Beschreibung |
+|----------|---------|-------------------|-------------|
+| [`/check-exists`](#check-exists) | POST | ✅ | Prüfung ob Datei existiert |
+| [`/upload`](#upload) | POST | ✅ | Datei hochladen |
+| [`/list`](#list) | POST | ❌ | Temp-Ordner auflisten |
+| [`/analyse`](#analyse) | POST | ❌ | KI-Analyse starten |
+| [`/finalize`](#finalize) | POST | ❌ | Finale Speicherung (verschiebt nur, keine Datei nötig) |
 
 ---
 
@@ -295,7 +295,7 @@ Oder **Array mit error-Feld**:
 
 ## `/finalize`
 
-Finalisiert die Upload-Verarbeitung und speichert Dateien in finale Verzeichnisse.
+Finalisiert die Upload-Verarbeitung und verschiebt Dateien aus dem Temp-Ordner in finale Verzeichnisse. **Es wird keine Datei mehr benötigt, nur Metadaten werden verarbeitet.**
 
 ### Request
 
