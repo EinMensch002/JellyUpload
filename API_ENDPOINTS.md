@@ -411,82 +411,159 @@ POST /webhook/jellyupload/finalize
 
 ### Szenario: User lädt zwei Dateien hoch
 
+**Schritt 1: CHECK-EXISTS**
+```json
+POST /webhook/jellyupload/check-exists
+
+Request:
+{
+  "filename": "Episode 1.mp4",
+  "sessionId": "session-123"
+}
+
+Response (HTTP 200):
+{
+  "exists": false
+}
 ```
-┌──────────────────────────────────────────────────────────┐
-│ 1. CHECK-EXISTS                                          │
-├──────────────────────────────────────────────────────────┤
-POST /check-exists
-{ "filename": "Episode 1.mp4", "sessionId": "session-123" }
 
-Response (200):
-{ "exists": false }  → Kann hochladen
-└──────────────────────────────────────────────────────────┘
-              ⬇
-┌──────────────────────────────────────────────────────────┐
-│ 2. UPLOAD                                                │
-├──────────────────────────────────────────────────────────┤
+Resultat: Datei existiert nicht → Kann hochladen
+
+---
+
+**Schritt 2: UPLOAD**
+```json
 POST /upload (multipart/form-data)
+
 FormData:
-├─ file: <Episode 1.mp4 Binär>
-├─ filename: "Episode 1.mp4"
-├─ sessionId: "session-123"
-└─ timestamp: "2026-01-28T10:30:45Z"
+- file: <Episode 1.mp4 Binär>
+- filename: "Episode 1.mp4"
+- sessionId: "session-123"
+- timestamp: "2026-01-28T10:30:45Z"
 
-Response (200):
-{ "success": true, "size": 1048576 }
-└──────────────────────────────────────────────────────────┘
-              ⬇
-┌──────────────────────────────────────────────────────────┐
-│ 3. LIST                                                  │
-├──────────────────────────────────────────────────────────┤
+Response (HTTP 200):
+{
+  "success": true,
+  "size": 1048576
+}
+```
+
+Resultat: Datei erfolgreich hochgeladen
+
+---
+
+**Schritt 3: LIST**
+```json
 POST /list
-{ "sessionId": "session-123" }
 
-Response (200):
+Request:
+{
+  "sessionId": "session-123"
+}
+
+Response (HTTP 200):
 {
   "files": [
     "Episode 1.mp4|||...",
     "Episode 2.mp4|||..."
   ]
 }
-└──────────────────────────────────────────────────────────┘
-              ⬇
-┌──────────────────────────────────────────────────────────┐
-│ 4. ANALYSE                                               │
-├──────────────────────────────────────────────────────────┤
+```
+
+Resultat: Temp-Ordner enthält 2 Dateien
+
+---
+
+**Schritt 4: ANALYSE**
+```json
 POST /analyse
+
+Request:
 {
   "files": ["Episode 1", "Episode 2"],
   "sessionId": "session-123"
 }
 
-Response (200):
+Response (HTTP 200):
 [
-  { "original_name": "Episode 1.mp4", "media_type": "series", ... },
-  { "original_name": "Episode 2.mp4", "media_type": "series", ... }
+  {
+    "original_name": "Episode 1.mp4",
+    "media_type": "series",
+    "jellyfin_name": "One Piece S01 E01",
+    "series_name": "One Piece",
+    "season": 1,
+    "episode": 1,
+    "fsk": "12",
+    "audience": "kids"
+  },
+  {
+    "original_name": "Episode 2.mp4",
+    "media_type": "series",
+    "jellyfin_name": "One Piece S01 E02",
+    "series_name": "One Piece",
+    "season": 1,
+    "episode": 2,
+    "fsk": "12",
+    "audience": "kids"
+  }
 ]
-└──────────────────────────────────────────────────────────┘
-              ⬇
-┌──────────────────────────────────────────────────────────┐
-│ 5. FINALIZE                                              │
-├──────────────────────────────────────────────────────────┤
+```
+
+Resultat: Beide Episoden erkannt und analysiert
+
+---
+
+**Schritt 5: FINALIZE**
+```json
 POST /finalize
+
+Request:
 {
   "edits": {
-    "Episode 1.mp4": { "name": "One Piece S01 E01", ... },
-    "Episode 2.mp4": { "name": "One Piece S01 E02", ... }
+    "Episode 1.mp4": {
+      "name": "One Piece S01 E01",
+      "season": 1,
+      "episode": 1,
+      "fsk": "12",
+      "audience": "kids"
+    },
+    "Episode 2.mp4": {
+      "name": "One Piece S01 E02",
+      "season": 1,
+      "episode": 2,
+      "fsk": "12",
+      "audience": "kids"
+    }
   },
   "sessionId": "session-123"
 }
 
-Response (200):
+Response (HTTP 200):
 {
   "success": true,
   "processed": 2,
-  "results": [...]
+  "results": [
+    {
+      "original_name": "Episode 1.mp4",
+      "final_name": "One Piece S01 E01.mp4",
+      "path": "/media/Serien/Kinder/One Piece/",
+      "status": "moved"
+    },
+    {
+      "original_name": "Episode 2.mp4",
+      "final_name": "One Piece S01 E02.mp4",
+      "path": "/media/Serien/Kinder/One Piece/",
+      "status": "moved"
+    }
+  ],
+  "cleanup": {
+    "temp_files_deleted": 2,
+    "session_cleaned": true
+  }
 }
-└──────────────────────────────────────────────────────────┘
 ```
+
+Resultat: Beide Dateien erfolgreich in korrektes Verzeichnis verschoben
 
 ---
 

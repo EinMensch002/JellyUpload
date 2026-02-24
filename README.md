@@ -78,53 +78,39 @@ npx http-server -p 8000
 
 ## 📋 Workflow
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│ 1️⃣  UPLOAD                                                   │
-├─────────────────────────────────────────────────────────────┤
-│ • Datei(en) hochladen (Drag & Drop oder Klick)             │
-│ • Server prüft: Existiert die Datei bereits?               │
-│   → Falls Ja: Benutzer wählt (Überschreiben/Umbenennen)     │
-│   → Falls Nein: Direkt hochladen                            │
-│ • Progress-Bar mit Upload-Geschwindigkeit                  │
-└─────────────────────────────────────────────────────────────┘
-                          ⬇
-┌─────────────────────────────────────────────────────────────┐
-│ 2️⃣  ANALYSE                                                  │
-├─────────────────────────────────────────────────────────────┤
-│ • Temp-Ordner-Dateien anzeigen (mit Checkboxen)            │
-│ • Benutzer wählt Dateien aus                               │
-│ • KI analysiert: Titel, Typ, Staffel, Episode, FSK         │
-│ • Suggestions generiert (z.B. Alternative Namen)           │
-└─────────────────────────────────────────────────────────────┘
-                          ⬇
-┌─────────────────────────────────────────────────────────────┐
-│ 3️⃣  KATEGORISIERUNG & BEARBEITUNG                            │
-├─────────────────────────────────────────────────────────────┤
-│ • Gruppierung nach Serien/Filme                            │
-│ • Für Serien:                                              │
-│   - Staffel/Episode automatisch erkannt                    │
-│   - Serie wechselbar oder neue Serie erstellbar            │
-│   - Bulk-Edit FSK/Zielgruppe                               │
-│ • Für Filme: Titel, FSK, Zielgruppe (Erwachsene/Kinder)    │
-│ • Nicht erkannte Dateien: Manuell klassifizieren           │
-│ • Checkbox: Einzelne Dateien abwählen vor Finalisierung    │
-└─────────────────────────────────────────────────────────────┘
-                          ⬇
-┌─────────────────────────────────────────────────────────────┐
-│ 4️⃣  FINALISIERUNG                                            │
-├─────────────────────────────────────────────────────────────┤
-│ • NUR ausgewählte Dateien werden gesendet                  │
-│ • POST an /finalize mit komplettem Metadata:               │
-│   • Original-Dateiname + Erweiterung                       │
-│   • Jellyfin-Name (z.B. "One Piece S01 E01")               │
-│   • Media-Type, Staffel, Episode                           │
-│   • FSK, Zielgruppe (adults/kids)                          │
-│   • Session-ID für Tracking                                │
-│ • Server speichert in richtige Verzeichnisse               │
-│ • Seite auto-reload nach erfolgreicher Fertigstellung      │
-└─────────────────────────────────────────────────────────────┘
-```
+### 1️⃣ Upload
+- Datei(en) hochladen via Drag & Drop oder Datei-Dialog
+- Server prüft: Existiert die Datei bereits?
+  - Falls Ja: Benutzer wählt (Überschreiben oder Umbenennen)
+  - Falls Nein: Direkt hochladen
+- Progress-Bar zeigt Upload-Geschwindigkeit und Fortschritt
+
+### 2️⃣ Analyse
+- Temp-Ordner-Dateien anzeigen mit Checkboxen
+- Benutzer wählt Dateien aus
+- KI analysiert automatisch: Titel, Typ, Staffel, Episode, FSK
+- Suggestions generiert (alternative Namen)
+
+### 3️⃣ Kategorisierung & Bearbeitung
+- Gruppierung nach Serien und Filmen
+- Für Serien:
+  - Staffel/Episode automatisch erkannt
+  - Serie wechselbar oder neue Series erstellbar
+  - Bulk-Edit für FSK/Zielgruppe über alle Episoden
+- Für Filme: Titel, FSK, Zielgruppe (Erwachsene/Kinder)
+- Nicht erkannte Dateien: Manuell klassifizieren
+- Checkboxen: Einzelne Dateien abwählen vor Finalisierung
+
+### 4️⃣ Finalisierung
+- NUR ausgewählte Dateien werden gesendet
+- POST an `/finalize` mit komplettem Metadata:
+  - Original-Dateiname + Erweiterung
+  - Jellyfin-Name (z.B. "One Piece S01 E01")
+  - Media-Type, Staffel, Episode
+  - FSK, Zielgruppe (adults/kids)
+  - Session-ID für Tracking
+- Server speichert in richtige Verzeichnisse
+- Seite auto-reload nach erfolgreicher Fertigstellung
 
 ## 🔌 API-Endpunkte
 
@@ -259,7 +245,7 @@ Vollständige Changelog: [CHANGELOG.md](CHANGELOG.md)
 
 ## 📄 Lizenz
 
-MIT License — Siehe [LICENSE](LICENSE) für Details
+**Dieses Projekt ist lizenzfrei und Public Domain.** Sie können es verwenden, modifizieren und verteilen ohne Einschränkungen.
 
 ---
 
