@@ -11,7 +11,7 @@
 - 🤖 **KI-Analyse** — Automatische Erkennung von Serien, Filmen, Metadaten (Staffel, Episode, FSK)
 - 🏷️ **Intelligente Benennung** — Jellyfin-kompatible Namen nach Standard
 - 🎯 **Kategorisierung** — Sortierung in Serien/Erwachsene, Serien/Kinder, Filme/Erwachsene, Filme/Kinder
-- ✏️ **Flexible Anpassung** — Manuelle Bearbeitung vor Upload ohne Neustart
+- ✏️ **Flexible Anpassung** — Manuelle Bearbeitung vor Upload
 - 📊 **Debug-Panel** — Endpoint-Tester für Troubleshooting
 - 🔒 **Session-Management** — Persistente Session-IDs für Tracking
 - 🎨 **Modern UI** — Responsives Interface mit Live-Feedback
@@ -25,7 +25,7 @@
 
 #### 1. **Projekt klonen**
 ```bash
-git clone https://github.com/yourusername/JellyUpload.git
+git clone https://github.com/EinMensch002/JellyUpload.git
 cd JellyUpload
 ```
 
