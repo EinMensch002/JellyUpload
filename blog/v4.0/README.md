@@ -1,6 +1,4 @@
- (copy of releases/BackupV4.0/README_V4.0.md)
 
----
 
 # 📁 Jellyfin Media Sortierung v4.0
 ## Vollständige Dokumentation & Setup Guide
