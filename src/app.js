@@ -172,10 +172,8 @@ function logDebug(message, type = 'log', details = null) {
     console.groupEnd();
   }
   
-  // UI aktualisieren wenn Debug-Modal offen ist
-  if (debugOpen) {
-    updateDebugUI();
-  }
+  // UI immer aktualisieren, damit Logs im Panel erscheinen
+  updateDebugUI();
 }
 
 /**
@@ -620,45 +618,6 @@ function generateDebugUploadJson() {
     buttonLabel = 'Prüfen';
     jsonTemplate = {
       filename: fileName,
-      sessionId: STATE.sessionId || 'debug-session-' + Date.now()
-    };
-  } else if (endpoint.includes('upload')) {
-    requiresFile = true;
-    buttonLabel = 'Upload';
-    jsonTemplate = {
-      filename: fileName,
-      sessionId: STATE.sessionId || 'debug-session-' + Date.now(),
-      timestamp: new Date().toISOString(),
-      overwrite: false
-    };
-  } else if (endpoint.includes('list')) {
-    requiresFile = false;
-    buttonLabel = 'Liste abrufen';
-    jsonTemplate = {
-      sessionId: STATE.sessionId || 'debug-session-' + Date.now()
-    };
-  } else if (endpoint.includes('analyse')) {
-    requiresFile = false;
-    buttonLabel = 'Analysieren';
-    jsonTemplate = {
-      files: [fileName],
-      sessionId: STATE.sessionId || 'debug-session-' + Date.now(),
-      tempPath: '/media/temp',
-      mode: 'ftp'
-    };
-  } else if (endpoint.includes('finalize')) {
-    requiresFile = false;
-    buttonLabel = 'Fertigstellen';
-    jsonTemplate = {
-      edits: {
-        [fileName]: {
-          name: 'TestName',
-          season: 1,
-          episode: 1,
-          fsk: '16',
-          audience: 'adults'
-        }
-      },
       sessionId: STATE.sessionId || 'debug-session-' + Date.now()
     };
   } else {
@@ -2586,7 +2545,7 @@ function displayAnalysisResults() {
                   ${episodes.map((ep, idx) => `
                     <div class="episode-row" data-filename="${escapeHtml(ep.filename)}" data-series-id="${seriesId}" data-series-name="${escapeHtml(seriesName)}">
                       <input type="checkbox" class="episode-checkbox" checked onchange="toggleFileSelection('${escapeHtml(ep.filename)}', this.checked); updateCheckboxesForSeries('${escapeHtml(seriesName)}')" title="Episode auswählen/abwählen" />
-                      <span class="episode-number">S${String(ep.season || 0).padStart(2, '0')} E${String(ep.episode || 0).padStart(2, '0')}</span>
+                      <span class="episode-number" onclick="toggleOVA('${escapeHtml(ep.filename)}')" style="cursor: pointer;">${ep.season === -1 ? 'OVA' : `S${String(ep.season || 0).padStart(2, '0')} E${String(ep.episode || 0).padStart(2, '0')}`}</span>
                       <span class="episode-title">${escapeHtml(ep.jellyfin_name || ep.original_name).substring(0, 50)}</span>
                       <span class="episode-meta">
                         ${ep.fsk ? `<span class="badge-fsk">FSK ${ep.fsk}</span>` : ''}
@@ -2796,6 +2755,11 @@ function editEpisodeModal(button) {
           </div>
           
           <div class="form-group">
+            <input type="checkbox" class="ova-special-checkbox" id="ova-special-${escapeHtml(filename)}" ${data.season === -1 ? 'checked' : ''} style="margin-right: 8px;">
+            <label for="ova-special-${escapeHtml(filename)}" style="font-size: 0.95rem; display: inline; cursor: pointer;">🎬 OVA/Special Folge</label>
+          </div>
+          
+          <div class="form-group">
             <label>FSK</label>
             <select class="fsk-edit" data-filename="${escapeHtml(filename)}">
               <option value="">– Keine –</option>
@@ -2820,6 +2784,14 @@ function editEpisodeModal(button) {
   const overlay = document.createElement('div');
   overlay.innerHTML = modalHtml;
   document.body.appendChild(overlay.firstElementChild);
+  // Typ vorauswählen je nach aktuellem media_type
+  setTimeout(() => {
+    let type = 'series';
+    if (data.media_type === 'movie') type = 'movie';
+    selectUnrecognizedType(filename, type, {
+      target: document.querySelector(`.type-select-btn[data-type="${type}"]`)
+    });
+  }, 0);
 }
 
 function editMovieModal(button) {
@@ -2842,8 +2814,79 @@ function editMovieModal(button) {
           </div>
           
           <div class="form-group">
-            <label>Filmtitel</label>
-            <input type="text" class="jellyfin-edit" value="${escapeHtml(data.jellyfin_name)}" data-filename="${escapeHtml(filename)}">
+            <label style="font-weight: bold; margin-bottom: 8px; display: block;">✨ Typ ändern</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px;">
+              <button class="type-select-btn" data-type="series" onclick="selectUnrecognizedType('${escapeHtml(filename)}', 'series', event)" style="
+                padding: 12px;
+                background: #f0f9ff;
+                border: 2px solid #0ea5e9;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: 600;
+                color: #0369a1;
+                transition: all 0.2s;
+              ">📺 Serie/Folge</button>
+              <button class="type-select-btn" data-type="movie" onclick="selectUnrecognizedType('${escapeHtml(filename)}', 'movie', event)" style="
+                padding: 12px;
+                background: #f0fdf4;
+                border: 2px solid #16a34a;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: 600;
+                color: #15803d;
+                transition: all 0.2s;
+              ">🎬 Film</button>
+            </div>
+          </div>
+          
+          <div id="series-options-${escapeHtml(filename)}" class="unrecognized-options" style="display: none; margin-bottom: 20px; padding: 16px; background: #f0f9ff; border-radius: 6px; border: 2px solid #0ea5e9;">
+            <label style="font-weight: bold; margin-bottom: 12px; display: block;">📺 Serienname</label>
+            <input type="text" class="unrecognized-series-name" value="${escapeHtml(data.series_name || '')}" placeholder="z.B. 'One Piece' oder 'Attack on Titan'" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #0ea5e9;
+              border-radius: 4px;
+              font-size: 0.95rem;
+            ">
+            <div style="margin-top: 16px;">
+              <input type="checkbox" class="ova-special-checkbox" id="ova-special-${escapeHtml(filename)}" ${data.season === -1 ? 'checked' : ''} style="margin-right: 8px;">
+              <label for="ova-special-${escapeHtml(filename)}" style="font-size: 0.95rem; color: #0ea5e9;">OVA/Special Folge</label>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px;">
+              <div class="form-group">
+                <label>Staffel</label>
+                <input type="number" class="season-edit" value="${data.season || 1}" data-filename="${escapeHtml(filename)}">
+              </div>
+              <div class="form-group">
+                <label>Folge</label>
+                <input type="number" class="episode-edit" value="${data.episode || 1}" data-filename="${escapeHtml(filename)}">
+              </div>
+            </div>
+          </div>
+          
+          <div id="movie-options-${escapeHtml(filename)}" class="unrecognized-options" style="display: none; margin-bottom: 20px; padding: 16px; background: #f0fdf4; border-radius: 6px; border: 2px solid #16a34a;">
+            <label style="font-weight: bold; margin-bottom: 8px; display: block;">🎬 Filmtitel</label>
+            <input type="text" class="unrecognized-movie-name" value="${escapeHtml(data.jellyfin_name)}" placeholder="z.B. 'The Matrix' oder 'Inception'" style="
+              width: 100%;
+              padding: 10px;
+              border: 2px solid #16a34a;
+              border-radius: 4px;
+              font-size: 0.95rem;
+              margin-bottom: 12px;
+            ">
+            <div class="form-group">
+              <label>Zielgruppe</label>
+              <select class="audience-edit-unrecognized" style="
+                width: 100%;
+                padding: 10px;
+                border: 2px solid #16a34a;
+                border-radius: 4px;
+              ">
+                <option value="">– Wählen –</option>
+                <option value="kids" ${data.audience === 'kids' ? 'selected' : ''}>👶 Kinder</option>
+                <option value="adults" ${data.audience === 'adults' ? 'selected' : ''}>👨 Erwachsene</option>
+              </select>
+            </div>
           </div>
           
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -2880,6 +2923,15 @@ function editMovieModal(button) {
   const overlay = document.createElement('div');
   overlay.innerHTML = modalHtml;
   document.body.appendChild(overlay.firstElementChild);
+  
+  // Typ vorauswählen je nach aktuellem media_type
+  setTimeout(() => {
+    let type = 'movie';
+    if (data.media_type === 'series') type = 'series';
+    selectUnrecognizedType(filename, type, {
+      target: document.querySelector(`.type-select-btn[data-type="${type}"]`)
+    });
+  }, 0);
 }
 
 /**
@@ -2947,7 +2999,6 @@ function editUnrecognizedFileModal(button) {
           
           <div id="series-options-${filename}" class="unrecognized-options" style="display: none; margin-bottom: 20px; padding: 16px; background: #f0f9ff; border-radius: 6px; border: 2px solid #0ea5e9;">
             <label style="font-weight: bold; margin-bottom: 12px; display: block;">📺 Serienname</label>
-            
             ${existingSeries.size > 0 ? `
               <div style="margin-bottom: 16px;">
                 <label style="font-size: 0.9rem; color: #6b7280; margin-bottom: 8px; display: block;">📌 Zu existierender Serie hinzufügen:</label>
@@ -2968,7 +3019,6 @@ function editUnrecognizedFileModal(button) {
                 </div>
               </div>
             ` : ''}
-            
             <div>
               <label style="font-size: 0.9rem; color: #6b7280; margin-bottom: 8px; display: block;">✏️ Oder neue Serie:</label>
               <input type="text" class="unrecognized-series-name" placeholder="z.B. 'One Piece' oder 'Attack on Titan'" style="
@@ -2978,6 +3028,10 @@ function editUnrecognizedFileModal(button) {
                 border-radius: 4px;
                 font-size: 0.95rem;
               ">
+            </div>
+            <div style="margin-top: 16px;">
+              <input type="checkbox" class="ova-special-checkbox" id="ova-special-${filename}" style="margin-right: 8px;">
+              <label for="ova-special-${filename}" style="font-size: 0.95rem; color: #0ea5e9;">OVA/Special Folge</label>
             </div>
           </div>
           
@@ -3019,7 +3073,16 @@ function editUnrecognizedFileModal(button) {
   const overlay = document.createElement('div');
   overlay.innerHTML = modalHtml;
   document.body.appendChild(overlay.firstElementChild);
-  
+
+  // Typ vorauswählen je nach aktuellem media_type
+  setTimeout(() => {
+    let type = 'series';
+    if (data.media_type === 'movie') type = 'movie';
+    selectUnrecognizedType(filename, type, {
+      target: document.querySelector(`.type-select-btn[data-type="${type}"]`)
+    });
+  }, 0);
+
   logDebug(`🔧 Edit-Modal für unerkannte Datei geöffnet: ${filename}`, 'info');
 }
 
@@ -3075,31 +3138,39 @@ function saveUnrecognizedFile(filename) {
     return;
   }
   
-  if (isSeriesSelected) {
-    const seriesName = document.querySelector('.unrecognized-series-name')?.value.trim();
-    if (!seriesName) {
-      alert('❌ Bitte geben Sie einen Seriennamen ein!');
-      return;
-    }
-    
-    // Bestimme Season/Episode aus dem Dateinamen (heuristisch)
-    let season = 1;
-    let episode = 1;
-    const seasonMatch = filename.match(/[Ss](\d+)/);
-    const episodeMatch = filename.match(/[Ee](\d+)/);
-    
-    if (seasonMatch) season = parseInt(seasonMatch[1]);
-    if (episodeMatch) episode = parseInt(episodeMatch[1]);
-    
-    // Aktualisiere die Analyse-Daten
-    data.media_type = 'series';
-    data.series_name = seriesName;
-    data.jellyfin_name = `${seriesName} S${String(season).padStart(2, '0')} E${String(episode).padStart(2, '0')}`;
-    data.season = season;
-    data.episode = episode;
-    data.status = undefined;  // Markiere als bearbeitet
-    
-    logDebug(`✅ Unerkannte Datei als SERIE hinzugefügt: "${filename}" → "${seriesName}"`, 'success');
+    if (isSeriesSelected) {
+      const seriesName = document.querySelector('.unrecognized-series-name')?.value.trim();
+      if (!seriesName) {
+        alert('❌ Bitte geben Sie einen Seriennamen ein!');
+        return;
+      }
+      // Prüfe, ob OVA/Special ausgewählt wurde
+      const ovaSpecialChecked = document.querySelector('.ova-special-checkbox')?.checked;
+      let season, episode;
+      if (ovaSpecialChecked) {
+        season = -1;
+        episode = '';
+      } else {
+        // Bestimme Season/Episode aus dem Dateinamen (heuristisch)
+        season = 1;
+        episode = 1;
+        const seasonMatch = filename.match(/[Ss](\d+)/);
+        const episodeMatch = filename.match(/[Ee](\d+)/);
+        if (seasonMatch) season = parseInt(seasonMatch[1]);
+        if (episodeMatch) episode = parseInt(episodeMatch[1]);
+      }
+      // Aktualisiere die Analyse-Daten
+      data.media_type = 'series';
+      data.series_name = seriesName;
+      if (ovaSpecialChecked) {
+        data.jellyfin_name = `${seriesName} OVA/Special`;
+      } else {
+        data.jellyfin_name = `${seriesName} S${String(season).padStart(2, '0')} E${String(episode).padStart(2, '0')}`;
+      }
+      data.season = season;
+      data.episode = episode;
+      data.status = undefined;  // Markiere als bearbeitet
+      logDebug(`✅ Unerkannte Datei als SERIE hinzugefügt: "${filename}" → "${seriesName}"${ovaSpecialChecked ? ' (OVA/Special)' : ''}`, 'success');
   } else {
     const movieName = document.querySelector('.unrecognized-movie-name')?.value.trim();
     const audience = document.querySelector('.audience-edit-unrecognized')?.value || '';
@@ -3265,6 +3336,33 @@ function saveEditModal(overlay) {
     STATE.userEdits[filename] = {};
   }
   
+  const originalData = STATE.analysisResults[filename];
+  
+  // ===== FILM/SERIE TYP-WECHSEL =====
+  const typeButtons = overlay.querySelectorAll('.type-select-btn');
+  let mediaTypeChanged = false;
+  if (typeButtons.length > 0) {
+    let newType = 'series';
+    for (let btn of typeButtons) {
+      if (btn.style.background === '#0ea5e9' || btn.style.background.includes('rgb(14, 165, 233)')) {
+        newType = btn.dataset.type;
+        break;
+      }
+    }
+    if (newType !== originalData.media_type) {
+      mediaTypeChanged = true;
+      originalData.media_type = newType;
+      logDebug(`🔄 Media-Typ geändert: ${originalData.media_type}`, 'info');
+      
+      // Wenn zu Serie gewechselt wurde, hole Serie/Folge Felder
+      if (newType === 'series') {
+        const seriesNameInput = overlay.querySelector('.unrecognized-series-name');
+        const seriesName = seriesNameInput?.value.trim() || 'Unknown';
+        originalData.series_name = seriesName;
+      }
+    }
+  }
+  
   // Sammle alle Änderungen
   const jellyfinInput = overlay.querySelector('.jellyfin-edit');
   const seasonInput = overlay.querySelector('.season-edit');
@@ -3272,22 +3370,66 @@ function saveEditModal(overlay) {
   const fskSelect = overlay.querySelector('.fsk-edit');
   const audienceSelect = overlay.querySelector('.audience-edit');
   const seriesSelect = overlay.querySelector('.series-edit');
+  const ovaCheckbox = overlay.querySelector('.ova-special-checkbox');
+  const unrecognizedSeriesNameInput = overlay.querySelector('.unrecognized-series-name');
+  const unrecognizedMovieNameInput = overlay.querySelector('.unrecognized-movie-name');
   
   // Ursprüngliche Serie
-  const originalData = STATE.analysisResults[filename];
   const oldSeriesName = originalData?.series_name || '';
-  const newSeriesName = seriesSelect?.value || oldSeriesName;
+  const newSeriesName = seriesSelect?.value || (unrecognizedSeriesNameInput?.value) || oldSeriesName;
   
   // Speichere Werte IMMER wenn Element existiert (nicht nur wenn gefüllt)
   if (jellyfinInput) STATE.userEdits[filename].jellyfin_name = jellyfinInput.value;
-  if (seasonInput) STATE.userEdits[filename].season = seasonInput.value;
-  if (episodeInput) STATE.userEdits[filename].episode = episodeInput.value;
   if (fskSelect) STATE.userEdits[filename].fsk = fskSelect.value;
   if (audienceSelect) STATE.userEdits[filename].audience = audienceSelect.value;
   
+  // ===== OVA/SPECIAL HANDLING =====
+  let isOVA = false;
+  if (ovaCheckbox && ovaCheckbox.checked) {
+    // OVA-Checkbox ist aktiviert
+    isOVA = true;
+    STATE.userEdits[filename].season = -1;
+    STATE.userEdits[filename].episode = '';
+    logDebug(`✨ Episode als OVA/Special markiert (Staffel -1)`, 'info');
+  } else if (seasonInput && parseInt(seasonInput.value) === -1) {
+    // Oder Staffel wurde direkt auf -1 gesetzt
+    isOVA = true;
+    STATE.userEdits[filename].season = -1;
+    STATE.userEdits[filename].episode = '';
+    logDebug(`✨ Staffel -1 erkannt: Als OVA/Special markiert`, 'info');
+  } else {
+    // Normale Episode
+    if (seasonInput) STATE.userEdits[filename].season = seasonInput.value;
+    if (episodeInput) STATE.userEdits[filename].episode = episodeInput.value;
+  }
+  
+  // ===== VALIDIERUNG: OVA-NAMEN UNTERSCHIEDLICH? =====
+  if (isOVA && originalData.media_type === 'series') {
+    const seriesName = newSeriesName || oldSeriesName;
+    const allOVAsInSeries = Object.entries(STATE.analysisResults).filter(([, item]) => 
+      item.series_name === seriesName && item.season === -1
+    );
+    
+    const ovaNames = new Set();
+    allOVAsInSeries.forEach(([fname, item]) => {
+      const editName = STATE.userEdits[fname]?.jellyfin_name || item.jellyfin_name;
+      ovaNames.add(editName);
+    });
+    
+    // Die aktuelle Datei auch prüfen
+    const currentEditName = STATE.userEdits[filename]?.jellyfin_name || jellyfinInput?.value || originalData.jellyfin_name;
+    ovaNames.add(currentEditName);
+    
+    if (ovaNames.size > 1) {
+      logDebug(`⚠️ HINWEIS: Diese Serie hat mehrere OVA/Special-Folgen mit unterschiedlichen Namen:`, 'warning');
+      ovaNames.forEach(name => logDebug(`   • ${name}`, 'data'));
+      logDebug(`   ⚡ Alle OVAs sollten den gleichen Namen haben oder eindeutig nummeriert sein!`, 'warning');
+    }
+  }
+  
   // WICHTIG: Serie-Wechsel
   let seriesChanged = false;
-  if (newSeriesName !== oldSeriesName) {
+  if (newSeriesName !== oldSeriesName && originalData.media_type === 'series') {
     seriesChanged = true;
     // Update series_name
     if (!STATE.userEdits[filename]) STATE.userEdits[filename] = {};
@@ -3297,13 +3439,42 @@ function saveEditModal(overlay) {
     originalData.series_name = newSeriesName;
     
     // Regeneriere jellyfin_name nach Konvention
-    const season = STATE.userEdits[filename].season || originalData.season;
-    const episode = STATE.userEdits[filename].episode || originalData.episode;
-    const regeneratedName = `${newSeriesName} S${season} E${episode}`;
+    const season = STATE.userEdits[filename].season !== undefined ? STATE.userEdits[filename].season : originalData.season;
+    const episode = STATE.userEdits[filename].episode !== undefined ? STATE.userEdits[filename].episode : originalData.episode;
+    
+    let regeneratedName;
+    if (season === -1 || season === '-1') {
+      regeneratedName = `${newSeriesName} OVA/Special`;
+    } else {
+      regeneratedName = `${newSeriesName} S${String(season).padStart(2, '0')} E${String(episode).padStart(2, '0')}`;
+    }
     
     STATE.userEdits[filename].jellyfin_name = regeneratedName;
     
-    logDebug(`🔄 Episode von Serie \"${oldSeriesName}\" zu \"${newSeriesName}\" verschoben`, 'info');
+    logDebug(`🔄 Episode von Serie "${oldSeriesName}" zu "${newSeriesName}" verschoben`, 'info');
+  }
+  
+  // WICHTIG: Wenn OVA/Special oder Media-Typ gewechselt → jellyfin_name neu generieren
+  if (isOVA || mediaTypeChanged) {
+    if (originalData.media_type === 'series') {
+      const series = newSeriesName || oldSeriesName;
+      let newName;
+      if (isOVA) {
+        // include existing episode/name after hyphen
+        let epiName = STATE.userEdits[filename]?.jellyfin_name || jellyfinInput?.value || originalData.jellyfin_name || '';
+        newName = `${series} OVA - ${epiName}`.trim();
+      } else {
+        const season = STATE.userEdits[filename].season !== undefined ? STATE.userEdits[filename].season : originalData.season;
+        const episode = STATE.userEdits[filename].episode !== undefined ? STATE.userEdits[filename].episode : originalData.episode;
+        newName = `${series} S${String(season).padStart(2, '0')} E${String(episode).padStart(2, '0')}`;
+      }
+      STATE.userEdits[filename].jellyfin_name = newName;
+      logDebug(`📝 Jellyfin-Name aktualisiert: ${newName}`, 'info');
+    } else if (originalData.media_type === 'movie' && mediaTypeChanged) {
+      const movieName = unrecognizedMovieNameInput?.value.trim() || jellyfinInput?.value || originalData.jellyfin_name;
+      STATE.userEdits[filename].jellyfin_name = movieName;
+      logDebug(`📝 Film-Titel aktualisiert: ${movieName}`, 'info');
+    }
   }
   
   logDebug(`✏️ Datei aktualisiert: ${filename}`, 'info');
@@ -3312,8 +3483,8 @@ function saveEditModal(overlay) {
   // 🎨 WICHTIG: Aktualisiere UI für diese Datei
   updateFileUIAfterEdit(filename);
   
-  // Wenn Serie gewechselt wurde, aktualisiere die ganze Anzeige um neuen Reiter zu erstellen
-  if (seriesChanged) {
+  // Wenn Serie gewechselt wurde oder Media-Typ sich änderte, aktualisiere die ganze Anzeige
+  if (seriesChanged || mediaTypeChanged) {
     displayAnalysisResults();
   }
   
@@ -3340,6 +3511,14 @@ function updateFileUIAfterEdit(filename) {
   
   // Strategie 1: Suche nach episode-row (für Serien-Episoden)
   let fileElement = document.querySelector(`.episode-row[data-filename="${escapeHtml(filename)}"]`);
+  // mark ova class if needed
+  if (fileElement) {
+    if (currentSeason == -1 || currentSeason === '-1') {
+      fileElement.classList.add('ova');
+    } else {
+      fileElement.classList.remove('ova');
+    }
+  }
   
   // Strategie 2: Suche nach movie-row (für Filme)
   if (!fileElement) {
@@ -3402,14 +3581,60 @@ function updateFileUIAfterEdit(filename) {
   if (originalData.media_type === 'series') {
     let episodeInfo = fileElement.querySelector('.episode-number');
     if (episodeInfo) {
-      episodeInfo.textContent = `S${String(currentSeason || 0).padStart(2, '0')} E${String(currentEpisode || 0).padStart(2, '0')}`;
-      logDebug(`🎬 Episode aktualisiert: S${String(currentSeason || 0).padStart(2, '0')} E${String(currentEpisode || 0).padStart(2, '0')}`, 'data');
+      let displayText;
+      if (currentSeason == -1 || currentSeason === '-1') {
+        displayText = 'OVA';
+        fileElement.classList.add('ova');
+      } else {
+        displayText = `S${String(currentSeason || 0).padStart(2, '0')} E${String(currentEpisode || 0).padStart(2, '0')}`;
+        fileElement.classList.remove('ova');
+      }
+      episodeInfo.textContent = displayText;
+      logDebug(`🎬 Episode aktualisiert: ${displayText}`, 'data');
     }
   }
   
   logDebug(`✅ UI erfolgreich aktualisiert für: ${filename}`, 'success');
 }
 
+
+
+// === Helper für OVA Umschaltung ===
+function toggleOVA(filename) {
+  const data = STATE.analysisResults[filename];
+  if (!data) return;
+
+  if (!STATE.userEdits[filename]) STATE.userEdits[filename] = {};
+
+  // Determine current season via edits or original
+  let season = STATE.userEdits[filename].season !== undefined ? STATE.userEdits[filename].season : data.season;
+  let isCurrentlyOVA = season == -1 || season === '-1';
+
+  if (!isCurrentlyOVA) {
+    // mark as OVA
+    STATE.userEdits[filename].season = -1;
+    STATE.userEdits[filename].episode = '';
+
+    // require name
+    let currentName = STATE.userEdits[filename].jellyfin_name || data.jellyfin_name || '';
+    if (!currentName || currentName.trim() === '') {
+      alert('Bitte gib einen Namen für die OVA/Special-Folge ein.');
+      editEpisodeModal({dataset:{filename}});
+      return;
+    }
+    // update jellyfin_name to include series prefix
+    const series = data.series_name || '';
+    STATE.userEdits[filename].jellyfin_name = `${series} OVA - ${currentName}`.trim();
+    logDebug(`🔁 Datei ${filename} als OVA markiert`, 'info');
+  } else {
+    // unmark: revert to original values
+    STATE.userEdits[filename].season = data.season || 1;
+    STATE.userEdits[filename].episode = data.episode || 1;
+    logDebug(`🔁 OVA-Markierung entfernt für ${filename}`, 'info');
+  }
+
+  updateFileUIAfterEdit(filename);
+}
 
 // ===== BULK-EDIT FUNKTIONEN FÜR SERIEN =====
 function applyBulkFsk(selectElement, seriesId) {

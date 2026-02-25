@@ -1872,6 +1872,12 @@ select.edit-field option:checked {
   font-weight: 600;
   color: var(--primary);
   min-width: 60px;
+  cursor: pointer;
+}
+
+.episode-row.ova .episode-number {
+  color: #f59e0b;
+  font-weight: 700;
 }
 
 .episode-title {

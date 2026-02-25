@@ -6,9 +6,36 @@ Veröffentlicht: **25. Februar 2026**
 
 ## [4.5] - Hauptversion
 
-### 🔍 Debug-System Überhaul
+### 🎬 OVA/Special-Episode Integration (N8N & Frontend)
 
 #### ✨ Neue Features
+
+- **OVA/Special-Episode Unterstützung**:
+  - N8N AI Cluster erkennt automatisch OVA und Special Episoden
+  - Setzt `season: -1` und `episode: ""` (leer) für OVA/Special statt "OVA"/"Special" Werte
+  - Konsistente Verarbeitung zwischen N8N AI Cluster und Frontend
+
+- **Verbesserte Metadaten-Verarbeitung**:
+  - N8N Server integriert OVA-Erkennung in der `N8N_ANALYSIS_PROMPT_V4.4`
+  - AI Cluster verarbeitet Dateien korrekt ohne "OVA"/"Special" in den Feldern
+
+- **Server Backups & Konfigurationen** (Neu enthalten):
+  - `serverbackend V2.2.json` — N8N Server Konfiguration mit OVA-Support
+  - `serverbackend aicluster V1.1.5.json` — AI Cluster Backup mit aktualisierter Logik
+  - Vollständige Backup-Dokumentation im Hauptprojekt
+
+#### 🔧 Technische Verbesserungen
+
+- **Standardisierte OVA-Behandlung**:
+  - Frontend (JavaScript): OVA-Episoden erhalten visual distinction mittels CSS
+  - Backend (N8N): Setzt `-1` für season, leeren String für episode
+  - Jellyfin-Kompatibilität durch standardisierte Werte
+
+---
+
+### 🔍 Debug-System Überhaul
+
+#### ✨ Zusätzliche Neue Features
 
 - **Konfigurierbare Debug-Kontrolle** via `app.json`:
   - `debug.enabled`: Hauptschalter für Debug-Modus
@@ -56,6 +83,7 @@ Veröffentlicht: **25. Februar 2026**
 
 | Issue | Beschreibung | Status |
 |-------|-------------|--------|
+| #OVA-001 | OVA/Special Episoden schrieben "OVA"/"Special" in Felder | ✅ Fixed → season:-1, episode:"" |
 | #DEBUG-001 | Debug-Button war immer sichtbar | ✅ Fixed |
 | #DEBUG-002 | Logs wurden nicht korrekt gespeichert bei normalen Anfragen | ✅ Fixed |
 | #DEBUG-003 | `detailedLogs` Array wurde nicht richtig geleert | ✅ Fixed |

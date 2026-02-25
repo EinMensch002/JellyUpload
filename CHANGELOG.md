@@ -8,6 +8,34 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/) und folgt
 
 ## [4.5] - 2026-02-25
 
+### 🎬 OVA/Special-Episode Integration (N8N & Frontend)
+
+#### ✨ Neue Features
+
+- **OVA/Special-Episode Unterstützung**:
+  - N8N AI Cluster erkennt automatisch OVA und Special Episoden
+  - Setzt `season: -1` und `episode: ""` (leer) für OVA/Special statt "OVA"/"Special" Werte
+  - Konsistente Verarbeitung zwischen N8N AI Cluster und Frontend
+
+- **Verbesserte Metadaten-Verarbeitung**:
+  - N8N Server integriert OVA-Erkennung in der `N8N_ANALYSIS_PROMPT_V4.4p1`
+  - AI Cluster verarbeitet Dateien korrekt ohne "OVA"/"Special" in den Feldern
+
+#### 🔧 Technische Verbesserungen
+
+- **Standardisierte OVA-Behandlung**:
+  - Frontend (JavaScript): OVA-Episoden erhalten visual distinction
+  - Backend (N8N): Setzt `-1` für season, leeren String für episode
+  - Jellyfin-Kompatibilität durch standardisierte Werte
+
+#### 📚 Neue Backups & Dokumentation
+
+- `serverbackend V2.2.json` - N8N Server Konfiguration mit OVA-Support
+- `serverbackend aicluster V1.1.5.json` - AI Cluster Backup mit aktualisierter Logik
+- Vollständige Backup-Dokumentation: [docs/BACKUPS.md](docs/BACKUPS.md)
+
+---
+
 ### 🔍 Debug-System Überhaul
 
 #### ✨ Neue Features

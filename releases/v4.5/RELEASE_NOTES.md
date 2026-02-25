@@ -4,14 +4,16 @@ Veröffentlicht: **25. Februar 2026**
 
 ## 🎯 Kurzfassung
 
-Komplettes Debug-System Überhaul mit verbesserter Kontrollierbarkeit, konsolidierter Log-Erfassung und ressourceneffizienten UI-Rendering. Debug ist jetzt über `app.json` konfigurierbar und nur sichtbar wenn aktiviert.
+Komplettes Überhaul mit Debug-System Verbesserungen, OVA/Special-Episode Support und N8N-Integration. Debug ist jetzt über `app.json` konfigurierbar, OVA-Episoden werden standardisiert als `season: -1, episode: ""` verarbeitet.
 
 **Highlights:**
+- ✅ **OVA/Special Episode Support** (Frontend + N8N + AI Cluster)
 - ✅ Konfigurierbare Debug-Kontrolle via `app.json`
 - ✅ Konsolidierte Log-Erfassung (IMMER gespeichert)
 - ✅ 🐛-Button nur sichtbar wenn Debug aktiviert
 - ✅ Exportierbare Dateiendungs-Konfiguration (50+ Formate)
-- ✅ 5 Bug Fixes + 4 neue Features
+- ✅ N8N Server V2.0 & AI Cluster V1.1.5 Integration
+- ✅ 6 Bug Fixes + 5 neue Features
 - ✅ Keine Breaking Changes
 
 ## 📚 Detaillierte Dokumentation
@@ -25,7 +27,29 @@ Komplettes Debug-System Überhaul mit verbesserter Kontrollierbarkeit, konsolidi
 
 ## 🔧 Was ist neu?
 
-### 1. **Konfigurierbare Debug-Kontrolle**
+### 1. **OVA/Special-Episode Integration** (NEW)
+
+```json
+{
+  "season": -1,
+  "episode": "",
+  "jellyfin_name": "Serienname OVA"
+}
+```
+
+**Features:**
+- Automatische OVA/Special Erkennung
+- N8N Server V2.0 Support
+- AI Cluster V1.1.5 Verarbeitung
+- Frontend Visual Distinction (CSS)
+- Jellyfin-konforme Formatierung
+
+**Auch enthalten:**
+- `serverbackend V2.2.json` — N8N Server mit OVA-Support
+- `serverbackend aicluster V1.1.5.json` — AI Cluster mit OVA-Verarbeitung
+- `N8N_ANALYSIS_PROMPT_V4.4.md` — Updated Analysis Prompt
+
+### 2. **Konfigurierbare Debug-Kontrolle**
 
 ```json
 {
@@ -72,11 +96,14 @@ Komplettes Debug-System Überhaul mit verbesserter Kontrollierbarkeit, konsolidi
 
 ## 📋 Enthalten
 
-- ✅ `app.js` (v4.5 — Debug-System überarbeitet)
-- ✅ `app.json` (v4.5 — Debug Config hinzugefügt)
-- ✅ `index.html` (unverändert)
-- ✅ `style.css` (unverändert)
-- ✅ `CHANGELOG.md` (Dieses Release)
+- ✅ `app.js` (v4.5 — Debug-System überarbeitet + OVA Support)
+- ✅ `app.json` (v4.5 — Debug Config + File Extensions)
+- ✅ `index.html` (v4.5)
+- ✅ `style.css` (v4.5 — OVA Episode Styling)
+- ✅ `N8N_ANALYSIS_PROMPT_V4.4.md` (Analysis Prompt mit OVA-Regeln)
+- `serverbackend V2.2.json` (N8N Server mit OVA-Support)
+- ✅ `serverbackend aicluster V1.1.5.json` (AI Cluster mit OVA-Verarbeitung)
+- ✅ `CHANGELOG.md` (Dieses Release — Haupt-Dokumentation)
 - ✅ `RELEASE_NOTES.md` (Diese Datei)
 
 ## 🚀 Installation

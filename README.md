@@ -108,7 +108,8 @@ python -m http.server 8000
 | `/analyse` | POST | ❌ | KI-Analyse starten |
 | `/finalize` | POST | ❌ | Speichern & verschieben |
 
-Vollständige API-Dokumentation: [API_ENDPOINTS.md](API_ENDPOINTS.md)
+Vollständige API-Dokumentation: [API_ENDPOINTS.md](API_ENDPOINTS.md)  
+Backup & Server-Konfigurationen: [docs/BACKUPS.md](docs/BACKUPS.md)
 
 ## 🐛 Troubleshooting & Debug
 
@@ -161,8 +162,8 @@ cp -r src/* /var/www/jellyupload/  # Apache/nginx
 
 | Version | Datum | Features |
 |---------|-------|----------|
-| **4.5** | Feb 2026 | Debug-System Überhaul, Logs-Zentralisierung |
-| **4.4** | Feb 2026 | Dateiendungs-Fix, 50+ Formate |
+| **4.5** | Feb 2026 | OVA/Special-Support, Debug-System Überhaul, N8N/AI Cluster Integration |
+| **4.4** | Feb 2026 | Dateiendungs-Fix, 50+ Formate, URL-Suffix Handling |
 | **4.3** | Jan 2026 | Series Management erweitert |
 | **4.2** | Jan 2026 | Live UI-Updates |
 | **4.1** | Jan 2026 | Edit Persistence & Path-Routing |

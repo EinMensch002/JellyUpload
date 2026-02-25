@@ -260,11 +260,40 @@ POST /webhook/jellyupload/analyse
 | `media_type` | "series" \| "movie" | Typ des Inhalts |
 | `jellyfin_name` | string | Standard-Name nach Jellyfin-Konvention |
 | `series_name` | string | (Serie) Name der Serie |
-| `season` | number | (Serie) Staffelnummer |
-| `episode` | number | (Serie) Episodennummer |
+| `season` | number | (Serie) Staffelnummer — **OVA/Special: -1** |
+| `episode` | number \| string | (Serie) Episodennummer — **OVA/Special: ""** (leer) |
 | `fsk` | string \| null | FSK-Einstufung (0, 6, 12, 16, 18) |
 | `audience` | string | Zielgruppe ("kids" oder "adults") |
 | `suggestions` | string | Pipe-separated Liste alternativer Namen |
+
+#### 🎬 OVA/Special-Episode Response
+
+Für erkannte OVA- oder Special-Episoden werden spezielle Werte gesetzt:
+
+```json
+{
+  "original_name": "One Piece - OVA Something.mp4",
+  "db_name": "One Piece - OVA Something",
+  "media_type": "series",
+  "jellyfin_name": "One Piece OVA",
+  "series_name": "One Piece",
+  "season": -1,
+  "episode": "",
+  "fsk": "12",
+  "audience": "kids",
+  "status": "success",
+  "message": "OVA erkannt - Standard-Behandlung angewendet",
+  "suggestions": ""
+}
+```
+
+| Feld | OVA-Wert | Normalwert | Grund |
+|------|----------|-----------|-------|
+| `season` | `-1` | 1-N | Grenache, dass es Spezialinhalt ist |
+| `episode` | `""` (leer) | 1-N | Keine Episodennummer für OVA |
+| `jellyfin_name` | "Serie OVA" | "Serie S1 E1" | Jellyfin-Standard für OVA |
+
+**Wichtig:** `season: -1` und `episode: ""` dürfen NIEMALS mit String-Werten wie "OVA" oder "Special" ersetzt werden!
 
 ### Error Response
 
