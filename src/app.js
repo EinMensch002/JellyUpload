@@ -2017,27 +2017,39 @@ function formatFileSize(bytes) {
  * "Show.s01e01.mkv" → "Show.s01e01"
  * "Film.2024.720p.avi" → "Film.2024.720p"
  */
+/* ================================
+   removeFileExtension(filename)
+   Lädt Video-Dateierweiterungen aus app.json CONFIG (NICHT hardcoded!)
+   Das verhindert Duplizierung und ermöglicht einfache Anpassung via Config
+================================ */
 function removeFileExtension(filename) {
   if (!filename || typeof filename !== 'string') {
     return '';
   }
   
-  // Liste ALLER bekannten Video-Dateierweiterungen
-  const videoExtensions = [
-    // Häufige Formate
-    '.mp4', '.avi', '.mkv', '.mov', '.webm', '.flv', '.wmv', '.m4v', '.3gp',
-    // Streaming-Formate
-    '.ts', '.m2ts', '.mts', '.m3u8',
-    // DVD/Blu-ray
-    '.vob', '.m2v',
-    // Apple
-    '.m4v', '.mov',
-    // Weitere Formate
-    '.ogv', '.asf', '.rm', '.rmvb', '.divx', '.dv', '.f4v', '.f4p', '.f4a', '.f4b',
-    '.mxf', '.mts', '.m1v', '.m2v', '.mts', '.wtv', '.webm', '.ogg', '.ogm',
-    '.mpg', '.mpeg', '.mpe', '.m2ts', '.mts', '.m1v', '.m2v', '.mts', '.ts',
-    '.vob', '.vro', '.tp', '.trp', '.mts', '.m1v', '.m2v'
-  ];
+  // Sammle Video-Erweiterungen aus app.json CONFIG
+  let videoExtensions = [];
+  if (CONFIG.fileExtensions?.video) {
+    const videoConfig = CONFIG.fileExtensions.video;
+    // Wenn es ein Objekt mit Kategorien ist
+    if (typeof videoConfig === 'object' && !Array.isArray(videoConfig)) {
+      videoExtensions = Object.values(videoConfig).flat();
+    }
+    // Wenn es ein Array ist
+    else if (Array.isArray(videoConfig)) {
+      videoExtensions = videoConfig;
+    }
+  }
+  
+  // Fallback auf Standard-Extensions
+  if (videoExtensions.length === 0) {
+    videoExtensions = [
+      '.mp4', '.avi', '.mkv', '.mov', '.webm', '.flv', '.wmv', '.m4v', '.3gp',
+      '.ts', '.m2ts', '.mts', '.m3u8', '.vob', '.m2v', '.ogv', '.asf', '.rm', '.rmvb',
+      '.divx', '.dv', '.f4v', '.f4p', '.f4a', '.f4b', '.mxf', '.wtv', '.ogg', '.ogm',
+      '.mpg', '.mpeg', '.mpe', '.m1v', '.tp', '.trp'
+    ];
+  }
   
   // Konvertiere zu Lowercase für Case-Insensitive Vergleich
   const lowerFilename = filename.toLowerCase();

@@ -31,5 +31,14 @@
       "analyse": { "requiresFile": false, "buttonLabel": "Analysieren" },
       "finalize": { "requiresFile": false, "buttonLabel": "Fertigstellen" }
     }
+  },
+  "fileExtensions": {
+    "video": {
+      "common": [".mp4", ".avi", ".mkv", ".mov", ".webm", ".flv", ".wmv", ".m4v", ".3gp"],
+      "streaming": [".ts", ".m2ts", ".mts", ".m3u8"],
+      "dvdBluray": [".vob", ".m2v"],
+      "apple": [".m4v", ".mov"],
+      "other": [".ogv", ".asf", ".rm", ".rmvb", ".divx", ".dv", ".f4v", ".f4p", ".f4a", ".f4b", ".mxf", ".wtv", ".ogg", ".ogm", ".mpg", ".mpeg", ".mpe", ".m1v", ".tp", ".trp"]
+    }
   }
 }
