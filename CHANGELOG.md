@@ -6,6 +6,62 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/) und folgt
 
 ---
 
+## [4.5] - 2026-02-25
+
+### 🔍 Debug-System Überhaul
+
+#### ✨ Neue Features
+
+- **Konfigurierbare Debug-Kontrolle** via `app.json`:
+  - `debug.enabled`: Hauptschalter für Debug-Modus
+  - `debug.allowUrlOverride`: Erlaubt `?debug=true` zum Überschreiben
+  
+- **Verbesserte Log-Erfassung**:
+  - IMMER alle Logs speichern (unabhängig von Konfiguration)
+  - Expandable Details-Objekte im Debug-Panel
+  - Farbcodierung für verschiedene Log-Typen
+
+- **Bedingte UI-Renderung**:
+  - 🐛-Button nur sichtbar wenn Debug aktiviert
+  - Debug-UI wird nicht beim Laden erstellt wenn deaktiviert
+  - Ressourcensparend für Produktionsumgebungen
+
+- **Exportierbare Dateiendungs-Konfiguration** (NEW):
+  - 50+ Video-Formate zentral in `fileExtensions` Sektion
+  - Strukturierte Kategorien: `common`, `streaming`, `dvdBluray`, `apple`, `other`
+  - Keine Code-Änderungen für neue Formate nötig
+  - Zentrale Verwaltung aller unterstützten Video-Extensions
+
+#### 🔧 Technische Verbesserungen
+
+- **Neue Initialisierungssequenz**:
+  1. Config laden (`loadConfig()`)
+  2. Debug-Modus initialisieren (`initDebugMode()`)
+  3. Weitere Systeme initialisieren
+
+- **Aktivierungsprioritäten**:
+  ```javascript
+  DEBUG_ENABLED = CONFIG.debug.enabled OR (CONFIG.debug.allowUrlOverride AND ?debug=true)
+  ```
+
+#### 🐛 Fixed Issues
+
+- Debug-Button war immer sichtbar
+- Logs wurden nicht korrekt gespeichert bei normalen Anfragen
+- `DEBUG_ENABLED` wurde vor Config-Load gesetzt
+- Debug-UI wurde auch bei deaktiviertem Debug erstellt
+- Video-Formate waren hardcoded → Jetzt zentral in `fileExtensions` Config konfigurierbar
+
+#### 📚 Dokumentation
+
+- Ausführliche Dokumentation: [blog/v4.5](blog/v4.5)
+- Konfigurationsbeispiele
+- Use-Case Beschreibungen
+
+**Keine Breaking Changes!** — Bestehender Code funktioniert ohne Änderungen.
+
+---
+
 ## [4.4] - 2026-02-24
 
 ### 📝 Endpunkt-Korrektur

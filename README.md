@@ -3,7 +3,7 @@
 > **Intelligente Mediaverwaltung für Jellyfin** — Automatisierte Datei-Upload- und Metadaten-Verwaltung mit KI-gestützter Analyse
 
 [![Status: Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://github.com)
-[![Version: 4.4](https://img.shields.io/badge/Version-4.4-blue)](https://github.com)
+[![Version: 4.5](https://img.shields.io/badge/Version-4.5-blue)](https://github.com)
 
 ## ✨ Kernfeatures
 
@@ -161,13 +161,15 @@ cp -r src/* /var/www/jellyupload/  # Apache/nginx
 
 | Version | Datum | Features |
 |---------|-------|----------|
+| **4.5** | Feb 2026 | Debug-System Überhaul, Logs-Zentralisierung |
 | **4.4** | Feb 2026 | Dateiendungs-Fix, 50+ Formate |
 | **4.3** | Jan 2026 | Series Management erweitert |
 | **4.2** | Jan 2026 | Live UI-Updates |
 | **4.1** | Jan 2026 | Edit Persistence & Path-Routing |
 | **4.0** | Jan 2026 | Datei-Abwahl System |
 
-→ [Vollständiger CHANGELOG](CHANGELOG.md)
+→ [Vollständiger CHANGELOG](CHANGELOG.md)  
+→ [v4.5 Dokumentation](blog/v4.5)
 
 ## 🔐 Sicherheit
 
