@@ -1,0 +1,44 @@
+{
+  "version": "4.5",
+  "debug": {
+    "enabled": false,
+    "allowUrlOverride": true
+  },
+  "paths": {
+    "SE": "/media/Serien/Erwachsene/",
+    "SK": "/media/Serien/Kinder/",
+    "FE": "/media/Filme/Erwachsene/",
+    "FK": "/media/Filme/Kinder/"
+  },
+  "upload": {
+    "enabled": true,
+    "disableChromeOS": true
+  },
+  "api": {
+    "n8nBaseUrl": "https://192.168.178.145:5678/webhook/jellyupload",
+    "n8nBaseUrlTest": "https://192.168.178.145:5678/webhook-test/jellyupload",
+    "endpoints": {
+      "checkExists": "/check-exists",
+      "upload": "/upload",
+      "list": "/list",
+      "analyse": "/analyse",
+      "finalize": "/finalize"
+    },
+    "endpointConfig": {
+      "checkExists": { "requiresFile": true, "buttonLabel": "Prüfen" },
+      "upload": { "requiresFile": true, "buttonLabel": "Upload" },
+      "list": { "requiresFile": false, "buttonLabel": "Liste abrufen" },
+      "analyse": { "requiresFile": false, "buttonLabel": "Analysieren" },
+      "finalize": { "requiresFile": false, "buttonLabel": "Fertigstellen" }
+    }
+  },
+  "fileExtensions": {
+    "video": {
+      "common": [".mp4", ".avi", ".mkv", ".mov", ".webm", ".flv", ".wmv", ".m4v", ".3gp"],
+      "streaming": [".ts", ".m2ts", ".mts", ".m3u8"],
+      "dvdBluray": [".vob", ".m2v"],
+      "apple": [".m4v", ".mov"],
+      "other": [".ogv", ".asf", ".rm", ".rmvb", ".divx", ".dv", ".f4v", ".f4p", ".f4a", ".f4b", ".mxf", ".wtv", ".ogg", ".ogm", ".mpg", ".mpeg", ".mpe", ".m1v", ".tp", ".trp"]
+    }
+  }
+}
