@@ -8,10 +8,10 @@
 ================================ */
 // Defaults (werden von app.json überschrieben)
 let CONFIG = {
-  version: '3.0',
+  version: '4.5',
   debug: {
     enabled: false,
-    allowUrlOverride: true
+    allowUrlOverride: false
   },
   paths: {
     tempUpload: '/media/temp',
@@ -28,35 +28,93 @@ let CONFIG = {
 };
 
 /* ================================
-   DEBUG SYSTEM - URL-aktiviert: ?debug=true
-   Übersichtliches Debug-Interface mit Tabs
+   DEBUG SYSTEM
+   
+   ⚙️ KONFIGURATION (app.json):
+     - debug.enabled: true/false (Hauptschalter)
+     - debug.allowUrlOverride: true/false (erlaubt URL-Parameter zu überschreiben)
+   
+   🔗 URL-PARAMETER:
+     - ?debug=true (funktioniert nur wenn allowUrlOverride=true)
+   
+   📋 AKTIVIERUNGSPRIORITÄTEN:
+     1. CONFIG.debug.enabled=true → Debug IMMER aktiv
+     2. CONFIG.debug.enabled=false + allowUrlOverride=true + ?debug=true → Debug AKTIV
+     3. CONFIG.debug.enabled=false + allowUrlOverride=false → Debug NICHT AKTIV (auch mit URL)
+     4. CONFIG.debug.enabled=false + allowUrlOverride=true + KEINE URL → Debug NICHT AKTIV
+   
+   🎯 HÄUFIGE SZENARIEN:
+   
+   SZENARIO 1: Immer Debugging aktiviert
+     "debug": { "enabled": true, "allowUrlOverride": true }
+     → Debug IMMER aktiv, egal ob URL-Parameter gesetzt
+   
+   SZENARIO 2: Debug nur mit URL-Parameter
+     "debug": { "enabled": false, "allowUrlOverride": true }
+     → Nur mit ?debug=true aktivierbar
+     → http://localhost:8000/src/index.html?debug=true
+   
+   SZENARIO 3: Debugging komplett deaktiviert
+     "debug": { "enabled": false, "allowUrlOverride": false }
+     → Kann nicht aktiviert werden, auch nicht mit URL-Parametern
+     → Debug-Panel ist nicht sichtbar
+   
 ================================ */
-const DEBUG_ENABLED = new URLSearchParams(window.location.search).get('debug') === 'true';
+let DEBUG_ENABLED = false; // Wird in initDebugMode() gesetzt (nach CONFIG-Load)
 
 let debugLogs = [];
 let debugOpen = false;
 let debugSelectedFile = null;
-let detailedLogs = [];  // Detaillierte Logs nur für Debug-Mode
 
+/**
+ * initDebugMode()
+ * Wird NACH loadConfig() aufgerufen, wenn CONFIG verfügbar ist
+ * 
+ * Bestimmt DEBUG_ENABLED basierend auf:
+ * 1. CONFIG.debug.enabled (Standard aus app.json)
+ * 2. URL-Parameter ?debug=true (nur wenn allowUrlOverride=true)
+ */
 function initDebugMode() {
-  logDebug('🚀 Jellyfin Sortierung v3.0 gestartet', 'system');
-  logDebug(`Debug Mode: ${DEBUG_ENABLED ? '✓ AKTIVIERT' : '✗ Deaktiviert'}`, DEBUG_ENABLED ? 'success' : 'info');
+  // ===== DEBUG-Modus Aktivierung =====
+  const debugFromConfig = CONFIG.debug?.enabled === true;
+  const debugFromUrl = new URLSearchParams(window.location.search).get('debug') === 'true';
+  const allowUrlOverride = CONFIG.debug?.allowUrlOverride === true;
   
-  // WICHTIG: Debug-UI IMMER erstellen, nicht nur wenn DEBUG_ENABLED!
-  // So können die Logs jederzeit über den 🐛-Button angesehen werden
-  createDebugUI();
+  // Bestimme finalen Debug-Status
+  DEBUG_ENABLED = debugFromConfig || (allowUrlOverride && debugFromUrl);
+  
+  // Log Source anzeigen
+  let debugSource = '✗ Deaktiviert';
+  if (debugFromConfig && debugFromUrl && allowUrlOverride) {
+    debugSource = '✓ Config + URL';
+  } else if (debugFromConfig) {
+    debugSource = '✓ Config (app.json)';
+  } else if (debugFromUrl && allowUrlOverride) {
+    debugSource = '✓ URL (?debug=true)';
+  }
+  
+  logDebug('🚀 Jellyfin Sortierung v4.5 gestartet', 'system');
+  logDebug(`Debug Mode: ${debugSource}`, DEBUG_ENABLED ? 'success' : 'info', {
+    enabled: DEBUG_ENABLED,
+    configEnabled: debugFromConfig,
+    urlParam: debugFromUrl,
+    allowUrlOverride: allowUrlOverride
+  });
+  
+  // Debug-UI NUR erstellen wenn Debug aktiviert ist!
+  if (DEBUG_ENABLED) {
+    createDebugUI();
+  }
 }
 
 /**
  * logDebug(message, type, details)
- * Zwei-Stufen Logging System:
- * 1. NORMALE LOGS: Einfache Nachricht mit Icon und Zeit (IMMER)
- * 2. DETAILLIERTE LOGS: Umfangreiche Informationen (NUR wenn DEBUG_ENABLED=true)
+ * System speichert IMMER Logs und macht sie im Debug-Panel sichtbar
  * 
  * Parameter:
- *   message: Hauptnachricht (wird immer geloggt)
+ *   message: Hauptnachricht (wird IMMER geloggt)
  *   type: 'system', 'info', 'success', 'error', 'warning', 'upload', 'analyse', 'data', 'config'
- *   details: Optionales Detailobjekt {variable: wert, ...} - wird NUR im Debug-Modus geloggt
+ *   details: Optionales Detailobjekt {variable: wert, ...} - wird auch gespeichert
  */
 function logDebug(message, type = 'log', details = null) {
   // Zeitstempel und Icon
@@ -76,13 +134,20 @@ function logDebug(message, type = 'log', details = null) {
   const timestamp = new Date().toLocaleTimeString('de-DE');
   const logMessage = `[${timestamp}] ${icon} ${message}`;
   
-  // ===== STUFE 1: NORMALE LOGS (IMMER) =====
-  debugLogs.push({ 
+  // ===== LOGS IMMER SPEICHERN =====
+  const logEntry = { 
     message: logMessage, 
     type,
     timestamp: new Date(),
     raw: message
-  });
+  };
+  
+  // Details speichern, wenn vorhanden
+  if (details) {
+    logEntry.details = typeof details === 'object' ? JSON.stringify(details, null, 2) : String(details);
+  }
+  
+  debugLogs.push(logEntry);
   
   // Console mit Farbe (IMMER ausgeben)
   const colorMap = {
@@ -99,19 +164,8 @@ function logDebug(message, type = 'log', details = null) {
   
   console.log(`%c${logMessage}`, colorMap[type] || 'color: inherit');
   
-  // ===== STUFE 2: DETAILLIERTE LOGS (NUR IM DEBUG-MODE) =====
+  // ===== DETAILLIERTE AUSGABE (NUR IM DEBUG-MODE) =====
   if (DEBUG_ENABLED && details) {
-    const detailString = typeof details === 'object' ? JSON.stringify(details, null, 2) : String(details);
-    const detailedLog = {
-      message: logMessage,
-      type,
-      timestamp: new Date(),
-      details: detailString,
-      raw: message
-    };
-    detailedLogs.push(detailedLog);
-    
-    // Auch in Console mit Details ausgeben (im Debug-Modus)
     console.group(`%c${logMessage}`, colorMap[type] || 'color: inherit');
     console.log('%cDETAILS:', 'color: #60a5fa; font-weight: bold');
     console.log(details);
@@ -451,23 +505,21 @@ function updateDebugUI() {
   const logsList = document.getElementById('debugLogsList');
   if (!logsList) return;
   
-  // Wähle die richtigen Logs basierend auf DEBUG_ENABLED
-  const logsToDisplay = DEBUG_ENABLED && detailedLogs.length > 0 ? detailedLogs : debugLogs;
-  
-  if (logsToDisplay.length === 0) {
+  // IMMER debugLogs anzeigen (wird immer aktualisiert, unabhängig von DEBUG_ENABLED)
+  if (debugLogs.length === 0) {
     logsList.innerHTML = '<div style="text-align:center;color:#94a3b8;">⏳ Bereit...</div>';
     return;
   }
   
-  logsList.innerHTML = logsToDisplay.map((log, idx) => {
+  logsList.innerHTML = debugLogs.map((log, idx) => {
     const errorClass = log.type === 'error' ? 'error' : '';
     
-    // Wenn detaillierte Logs und Details vorhanden: Mit expandbarem Details-Bereich
-    if (DEBUG_ENABLED && log.details) {
+    // Wenn Details vorhanden: Mit expandbarem Details-Bereich
+    if (log.details) {
       return `
         <div class="debug-log ${errorClass}" onclick="this.classList.toggle('expanded')">
           <div style="font-weight: bold; margin-bottom: 4px;">${escapeHtml(log.message)}</div>
-          <div class="debug-details" style="display: none; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px; margin-top: 8px; font-size: 0.85rem; max-height: 200px; overflow-y: auto;">
+          <div class="debug-details" style="display: none; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px; margin-top: 8px; font-size: 0.85rem; max-height: 200px; overflow-y: auto; cursor: pointer;">
             <pre style="margin: 0; white-space: pre-wrap; word-break: break-word; color: #86efac;">${escapeHtml(log.details)}</pre>
           </div>
         </div>
@@ -1012,7 +1064,6 @@ function exportDebugLogs() {
 function clearDebugLogs() {
   if (confirm('Alle Logs wirklich löschen?')) {
     debugLogs = [];
-    detailedLogs = [];  // Auch detaillierte Logs löschen
     updateDebugUI();
     logDebug('Logs geleert', 'info');
   }
@@ -4152,15 +4203,13 @@ function escapeHtml(text) {
    INITIALIZATION
 ================================ */
 document.addEventListener('DOMContentLoaded', async () => {
-  logDebug('=== DOMContentLoaded ===', 'info');
-  
   // 1. ZUERST: Config aus app.json laden (MUSS WARTEN!)
   // KRITISCH: initUploadSystem() braucht CONFIG.upload um korrekt zu arbeiten!
   await loadConfig();
-  logDebug('✓ Config aus app.json geladen', 'config');
   
-  // 2. Init debug
+  // 2. DANACH: Debug-Modus initialisieren (DEBUG_ENABLED wird hier gesetzt!)
   initDebugMode();
+  logDebug('✓ App initialisiert - Config geladen', 'config');
   
   // 3. After config load: Update debug UI (NUR wenn Debug aktiviert!)
   if (DEBUG_ENABLED) {
