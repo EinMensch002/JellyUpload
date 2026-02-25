@@ -13,7 +13,7 @@ Kurzüberblick der markanten Änderungen, die `src` betreffen:
 
 Weitere Details und Implementierungsnotizen:
 
-- Implementation und Beispiele: [src/ANALYSE_DB_INTEGRATION.md](/ANALYSE_DB_INTEGRATION.md)
-- Projektübersicht und Endpoints: [src/README.md](/README.md)
+- Implementation und Beispiele: [src/ANALYSE_DB_INTEGRATION.md](ANALYSE_DB_INTEGRATION.md)
+- Projektübersicht und Endpoints: [src/README.md](README.md)
 
 Wenn du möchtest, kann ich noch ein kurzes, einseitiges "Highlights"-Dokument erstellen oder diese Änderung in die Release-Notizen unter `releases/v4.4` übernehmen.
