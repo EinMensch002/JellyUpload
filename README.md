@@ -5,43 +5,29 @@
 [![Status: Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://github.com)
 [![Version: 4.4](https://img.shields.io/badge/Version-4.4-blue)](https://github.com)
 
-## ✨ Features
+## ✨ Kernfeatures
 
-- 📤 **Datei-Upload** — Drag & Drop oder klassischer File-Dialog
-- 🤖 **KI-Analyse** — Automatische Erkennung von Serien, Filmen, Metadaten (Staffel, Episode, FSK)
-- 🏷️ **Intelligente Benennung** — Jellyfin-kompatible Namen nach Standard
-- 🎯 **Kategorisierung** — Sortierung in Serien/Erwachsene, Serien/Kinder, Filme/Erwachsene, Filme/Kinder
-- ✏️ **Flexible Anpassung** — Manuelle Bearbeitung vor Upload
-- 📊 **Debug-Panel** — Endpoint-Tester für Troubleshooting
-- 🔒 **Session-Management** — Persistente Session-IDs für Tracking
-- 🎨 **Modern UI** — Responsives Interface mit Live-Feedback
+| Feature | Beschreibung |
+|---------|-------------|
+| 📤 **Upload** | Drag & Drop oder File-Dialog |
+| 🤖 **KI-Analyse** | Automatische Erkennung (Genre, FSK, Staffel/Episode) |
+| 🏷️ **Auto-Benennung** | Jellyfin-Standard Format |
+| 🎯 **Kategorisierung** | Serien/Filme × Erwachsene/Kinder |
+| ✏️ **Flexible Bearbeitung** | Vor-Upload Anpassung möglich |
+| 📊 **Debug-Tools** | Endpoint-Tester & Log-Export |
+| 🎨 **Modern UI** | Responsive Design mit Live-Feedback |
 
-### Unterstützte Formate
-**50+ Video-Formate** einschließlich: `.mp4` `.mkv` `.avi` `.mov` `.webm` `.flv` `.ts` `.vob` `.m2ts` und weitere
+**Unterstützte Formate:** 50+ Video-Formate (.mp4, .mkv, .avi, .mov, .webm, .flv, .ts, .vob, .m2ts…)
 
-## 🚀 Quick Start
+## 🚀 Installation & Setup
 
-### Installation
-
-#### 1. **Projekt klonen**
+### 1. Projekt klonen
 ```bash
 git clone https://github.com/EinMensch002/JellyUpload.git
 cd JellyUpload
 ```
 
-#### 2. **Dateistruktur erkennen**
-```
-JellyUpload/
-├── src/                    # Aktive Version
-│   ├── app.js             # Hauptlogik
-│   ├── app.json           # Konfiguration
-│   ├── index.html         # UI
-│   └── style.css          # Styling
-├── releases/              # Backups älterer Versionen
-└── README.md              # Diese Datei
-```
-
-#### 3. **Konfigurieren (app.json)**
+### 2. Konfigurieren (app.json)
 ```json
 {
   "api": {
@@ -63,186 +49,138 @@ JellyUpload/
 }
 ```
 
-#### 4. **Starten**
+### 3. Starten
 ```bash
-# Lokal mit Python
 python -m http.server 8000
-
-# Oder npm
-npm install http-server
-npx http-server -p 8000
+# oder: npm install http-server && npx http-server -p 8000
 ```
 
-Öffne: `http://localhost:8000/src/index.html`
+Öffnen Sie: `http://localhost:8000/src/index.html`
 
 ## 📋 Workflow
 
-### 1️⃣ Upload
-- Datei(en) hochladen via Drag & Drop oder Datei-Dialog
-- Server prüft: Existiert die Datei bereits?
-  - Falls Ja: Benutzer wählt (Überschreiben oder Umbenennen)
-  - Falls Nein: Direkt hochladen
-- Progress-Bar zeigt Upload-Geschwindigkeit und Fortschritt
+### 🔄 Ablauf
 
-### 2️⃣ Analyse
-- Temp-Ordner-Dateien anzeigen mit Checkboxen
-- Benutzer wählt Dateien aus
-- KI analysiert automatisch: Titel, Typ, Staffel, Episode, FSK
-- Suggestions generiert (alternative Namen)
+1️⃣ **Upload**
+- Datei hochladen via Drag & Drop  
+- System prüft: Existiert die Datei bereits?
+- Optional: Überschreiben oder mit neuem Namen speichern
 
-### 3️⃣ Kategorisierung & Bearbeitung
-- Gruppierung nach Serien und Filmen
-- Für Serien:
-  - Staffel/Episode automatisch erkannt
-  - Serie wechselbar oder neue Series erstellbar
-  - Bulk-Edit für FSK/Zielgruppe über alle Episoden
-- Für Filme: Titel, FSK, Zielgruppe (Erwachsene/Kinder)
-- Nicht erkannte Dateien: Manuell klassifizieren
-- Checkboxen: Einzelne Dateien abwählen vor Finalisierung
+2️⃣ **Analyse**
+- KI analysiert Dateien automatisch
+- Erkannt: Titel, Typ (Serie/Film), Staffel, Episode, FSK
 
-### 4️⃣ Finalisierung
-- NUR ausgewählte Dateien werden gesendet
-- POST an `/finalize` mit komplettem Metadata:
-  - Original-Dateiname + Erweiterung
-  - Jellyfin-Name (z.B. "One Piece S01 E01")
-  - Media-Type, Staffel, Episode
-  - FSK, Zielgruppe (adults/kids)
-  - Session-ID für Tracking
-- **Es wird keine Datei mehr benötigt, die Dateien werden aus dem Temp-Ordner verschoben**
-- Server speichert in richtige Verzeichnisse
-- Seite auto-reload nach erfolgreicher Fertigstellung
+3️⃣ **Bearbeitung**
+- Manuell anpassen möglich
+- Zielgruppe wählen (Erwachsene/Kinder)
+- Nicht erkannte Dateien klassifizieren
+- Checkboxen: Einzelne Dateien abwählen
+
+4️⃣ **Finalisierung**
+- POST an `/finalize` mit komplettem Metadata
+- Dateien aus Temp-Ordner in richtige Verzeichnisse verschieben
+- Auto-Reload nach erfolgreichem Abschluss
+
+### 📤 Finalisierungs-Payload
+```javascript
+{
+  "originalName": "Arcane S01E01 S.to.mp4",          // Original-Dateiname
+  "fileExtension": ".mp4",                            // Erkannte Erweiterung
+  "path": "/media/Serien/Erwachsene/",               // Zielverzeichnis
+  "audience": "adults",                               // Zielgruppe
+  "mediaType": "series",                              // series|movie
+  "jellyfin_name": "Arcane S01 E01",                 // Jellyfin-Standard
+  "season": 1,                                        // Staffel (nur Serien)
+  "episode": 1,                                       // Episode (nur Serien)
+  "series_name": "Arcane",                           // Serienname (nur Serien)
+  "fsk": "16",                                        // FSK-Einstufung
+  "sessionId": "session-1234567890-abc123"           // Tracking-ID
+}
+```
 
 ## 🔌 API-Endpunkte
 
-| Endpoint      | Methode | Datei erforderlich | Beschreibung |
-|---------------|---------|-------------------|-------------|
-| `/check-exists` | POST    | ✅                | Prüfung ob Datei existiert |
-| `/upload`       | POST    | ✅                | Datei hochladen |
-| `/list`         | POST    | ❌                | Temp-Ordner auflisten |
-| `/analyse`      | POST    | ❌                | KI-Analyse starten |
-| `/finalize`     | POST    | ❌                | Finale Speicherung (verschiebt nur, keine Datei nötig) |
+| Endpoint | Methode | Datei | Beschreibung |
+|----------|---------|-------|-------------|
+| `/check-exists` | POST | ✅ | Existiert Datei bereits? |
+| `/upload` | POST | ✅ | Datei hochladen |
+| `/list` | POST | ❌ | Temp-Ordner auflisten |
+| `/analyse` | POST | ❌ | KI-Analyse starten |
+| `/finalize` | POST | ❌ | Speichern & verschieben |
 
-### Request/Response Struktur
+Vollständige API-Dokumentation: [API_ENDPOINTS.md](API_ENDPOINTS.md)
 
-Detaillierte API-Dokumentation siehe: [API_ENDPOINTS.md](API_ENDPOINTS.md)
+## 🐛 Troubleshooting & Debug
 
-## ⚙️ Konfiguration
+### Upload funktioniert nicht?
+
+| Problem | Ursache | Lösung |
+|---------|---------|--------|
+| Auf Android | FormData-Bug | Desktop/Laptop verwenden |
+| Auf Chrome OS | `disableChromeOS: true` | Einstellung ändern oder anderes Gerät |
+| Upload deaktiviert | `upload.enabled: false` | In app.json aktivieren |
+| CORS-Fehler | N8N fehlende Header | CORS-Konfiguration in N8N prüfen |
+
+### Analyse schlägt fehl?
+- **N8N Webhook offline?** → Direkt testen: `curl -X POST https://...`
+- **KI-Service nicht erreichbar?** → Backend-Logs prüfen
+- **Keine Zugriffe auf /media/temp?** → FTP/SFTP-Berechtigungen kontrollieren
+- **Detaillierte Fehler?** → Debug-Mode aktivieren: `?debug=true`
+
+### Dateiendung falsch erkannt? (v4.4+)
+✅ **Gelöst:** Intelligente Erkennung für 50+ Video-Formate  
+Beispiel: "Arcane S01E01 S.to.mp4" → "Arcane S01 E01" ✓
+
+## ⚙️ Erweiterte Konfiguration
 
 ### Debug-Mode aktivieren
 ```
 http://localhost:8000/src/index.html?debug=true
 ```
 
-Features im Debug-Mode:
-- 🐛 Umfangreiche Logs mit JSON-Details
-- 🧪 Endpoint-Tester (Test/Production Umgebung)
-- 📊 Test-Verlauf & Response-Analyse
-- 📥 Log-Export als .txt
+**Enthält:** JSON-Logs • Endpoint-Tester • Response-Analyse • Log-Export
 
-### Gerätespezifische Einstellungen
+### Session-Management
 ```json
 {
   "upload": {
-    "enabled": true,           // Upload global aktivieren
-    "disableChromeOS": true   // Upload auf Chrome OS deaktivieren
+    "enabled": true,
+    "disableChromeOS": true
   }
 }
 ```
 
-## 🐛 Troubleshooting
+## 📦 Direkt-Deployment
 
-### ❌ Upload funktioniert nicht
-```
-💡 Häufige Ursachen:
-1. Android erkannt: FormData-Bug → Upload deaktiviert
-2. Chrome OS + disableChromeOS=true → Upload deaktiviert  
-3. upload.enabled=false in app.json
-4. CORS-Fehler: N8N Server sendet keine Access-Control-* Header
-
-✅ Lösung:
-• Verwende Desktop/Laptop
-• Überprüfe CORS-Konfiguration in N8N
-• Aktiviere Upload in app.json
-```
-
-### ❌ Analyse schlägt fehl
-```
-💡 Häufige Ursachen:
-1. N8N Webhook ist offline
-2. KI/AI-Service nicht erreichbar
-3. FTP/SFTP Zugang zu /media/temp fehlt
-4. Workflow-Nodes nicht konfiguriert
-
-✅ Lösung:
-• Überprüfe Debug-Panel für genaue Fehler
-• Teste N8N Webhook direkt: curl -X POST https://...
-• Aktiviere Debug-Mode (?debug=true) für Logs
-```
-
-### ❌ Dateiendung wird falsch erkannt
-```
-💡 Problem (< v4.4):
-"Arcane S01E01 S.to.mp4" → "Arcane S01E01 S.to" ❌
-
-✅ Lösung (v4.4+):
-Intelligente Erkennung aller 50+ Video-Formate
-→ Erkennt .mp4 korrekt, ignoriert .to URL-Suffix
-→ Ergebnis: "Arcane S01E01" ✅
-```
-
-## 📊 Datenfluss zur Finalisierung
-
-Die Anwendung sendet folgende Struktur an `/finalize`:
-
-```javascript
-{
-  "originalName": "Arcane S01E01 S.to.mp4",     // Original-Dateiname
-  "fileExtension": ".mp4",                       // Erkannte Endung
-  "path": "/media/Serien/Erwachsene/",          // Zielpath
-  "audience": "adults",                         // Zielgruppe
-  "mediaType": "series",                         // series|movie
-  "jellyfin_name": "Arcane S01 E01",            // Jellyfin-Standard-Name
-  "season": 1,                                   // (nur für Serien)
-  "episode": 1,                                  // (nur für Serien)
-  "series_name": "Arcane",                       // (nur für Serien)
-  "fsk": "16",                                   // FSK-Einstufung
-  "sessionId": "session-1234567890-abc123"       // Tracking-ID
-}
-```
-
-## 🎨 Direkt-Import
-
-Die Dateien sind **sofort produktionsbereit**. Kopiere den `src/`-Ordner in deine Webserver-VirtualHost:
-
+Die `src/`-Dateien sind **sofort einsatzbereit**:
 ```bash
-# z.B. für Apache/nginx
-cp -r src/* /var/www/jellyupload/
+cp -r src/* /var/www/jellyupload/  # Apache/nginx
 ```
 
 ## 📈 Version History
 
-| Version | Datum | Hauptfeatures |
-|---------|-------|---------------|
-| **4.4** | Feb 2026 | 🔧 Dateiendungs-Fix, 50+ Format-Support |
-| **4.3** | Jan 2026 | 📺 Serie Management erweitert |
-| **4.2** | Jan 2026 | ⚡ Live UI-Updates |
-| **4.1** | Jan 2026 | 🐛 Edit Persistence & Path-Routing |
-| **4.0** | Jan 2026 | ✨ Datei-Abwahl System, Logging |
+| Version | Datum | Features |
+|---------|-------|----------|
+| **4.4** | Feb 2026 | Dateiendungs-Fix, 50+ Formate |
+| **4.3** | Jan 2026 | Series Management erweitert |
+| **4.2** | Jan 2026 | Live UI-Updates |
+| **4.1** | Jan 2026 | Edit Persistence & Path-Routing |
+| **4.0** | Jan 2026 | Datei-Abwahl System |
 
-Vollständige Changelog: [CHANGELOG.md](CHANGELOG.md)
+→ [Vollständiger CHANGELOG](CHANGELOG.md)
 
 ## 🔐 Sicherheit
 
 - ✅ Session-IDs für Request-Tracking
-- ✅ CORS-Support (konfigurierbar in N8N)
+- ✅ CORS-Support (konfigurierbar)
 - ✅ Keine sensiblen Daten in Browser-Logs
-- ⚠️ Client-Side Validierung nur für UX (Server-Validierung erforderlich!)
+- ⚠️ Server-seitige Validierung erforderlich!
 
-## 📞 Support & Kontakt
+## 📞 Support
 
-- 🐛 **Issues**: [GitHub Issues](https://github.com)
-- 💬 **Diskussionen**: [GitHub Discussions](https://github.com)
+- [GitHub Issues](https://github.com)
+- [GitHub Discussions](https://github.com)
 
 ## 📄 Lizenz
 
-**Dieses Projekt ist lizenzfrei und Public Domain.** Sie können es verwenden, modifizieren und verteilen ohne Einschränkungen.
+**Public Domain** - Frei verwendbar, modifizierbar und weitergabefähig.
