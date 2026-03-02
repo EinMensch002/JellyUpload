@@ -2,11 +2,11 @@
 
 > **Intelligente Mediaverwaltung für Jellyfin** — Automatisierte Datei-Upload- und Metadaten-Verwaltung mit KI-gestützter Analyse
 
-[![Status: Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://github.com)
+[![Statu4s: Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://github.com)
 [![Version: 4.5](https://img.shields.io/badge/Version-4.5-blue)](https://github.com)
 
 ## ✨ Kernfeatures
-
+ 
 | Feature | Beschreibung |
 |---------|-------------|
 | 📤 **Upload** | Drag & Drop oder File-Dialog |
