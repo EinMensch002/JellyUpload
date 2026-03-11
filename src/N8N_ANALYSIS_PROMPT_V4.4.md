@@ -59,7 +59,7 @@ Input: "Document"
 ```
 media_type: "movie" | "series"
 audience: "kids" | "adults"
-fsk: 0, 6, 12, 16, 18 oder null  // MUSS immer versucht werden zu ermitteln
+fsk: 0, 6, 12, 16, 18 oder ""  // MUSS immer versucht werden zu ermitteln
 ```
 
 ---
