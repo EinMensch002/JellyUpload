@@ -244,12 +244,3 @@ Nutze den **Debug-Button** (🐛) zum Testen einzelner Endpoints:
 
 ---
 
-## 📞 Dokumentation
-
-- **N8N Setup:** `N8N_ANALYSIS_PROMPT_V4.4.md`
-- **Dateiendungs-Fix:** `BackupV4.4/BUGFIX_FILEEXTENSION.md`
-
----
-
-**Version 4.4** | Production Ready | Last Updated: Feb 2026
-
